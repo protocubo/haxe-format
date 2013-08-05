@@ -15,13 +15,13 @@ class TestCSV extends TestCase {
 		// good
 		var a = reader( i, "N", "S", "Q");
 		assertEquals( NL0_noNL1, a.typeTable.get( "N".code ) );
-		assertEquals( SEP, a.typeTable.get( "S".code ) );
-		assertEquals( QTE, a.typeTable.get( "Q".code ) );
+		assertEquals(       SEP, a.typeTable.get( "S".code ) );
+		assertEquals(       QTE, a.typeTable.get( "Q".code ) );
 		var b = reader( i, "NL", "S", "Q");
-		assertEquals( NL0, b.typeTable.get( "N".code ) );
-		assertEquals( NL1, b.typeTable.get( "L".code ) );
-		assertEquals( SEP, b.typeTable.get( "S".code ) );
-		assertEquals( QTE, b.typeTable.get( "Q".code ) );
+		assertEquals(       NL0, b.typeTable.get( "N".code ) );
+		assertEquals(       NL1, b.typeTable.get( "L".code ) );
+		assertEquals(       SEP, b.typeTable.get( "S".code ) );
+		assertEquals(       QTE, b.typeTable.get( "Q".code ) );
 
 		// bad
 		assertAnyException( reader.bind( i,    "",  "S",  "Q") );
