@@ -5,21 +5,31 @@ import haxe.io.StringInput;
 @:access( format.csv.Reader )
 class TestCSV extends TestCase {
 
+	function reader( i, nl, sep, qte ) {
+		return new Reader( i, nl, sep, qte );
+	}
+
 	public function testConstruction() {
 		var i = new StringInput( "test string" );
 
 		// good
-		var a = new Reader( i, "N", "S", "Q");
-		assertEquals( NL0_noNL1, a.getCharType( "N".charCodeAt( 0 ) ) );
-		var b = new Reader( i, "NL", "S", "Q");
+		var a = reader( i, "N", "S", "Q");
+		assertEquals( NL0_noNL1, a.typeTable.get( "N".code ) );
+		assertEquals( SEP, a.typeTable.get( "S".code ) );
+		assertEquals( QTE, a.typeTable.get( "Q".code ) );
+		var b = reader( i, "NL", "S", "Q");
+		assertEquals( NL0, b.typeTable.get( "N".code ) );
+		assertEquals( NL1, b.typeTable.get( "L".code ) );
+		assertEquals( SEP, b.typeTable.get( "S".code ) );
+		assertEquals( QTE, b.typeTable.get( "Q".code ) );
 
 		// bad
-		assertAnyException( Reader.new.bind( i,    "",  "S",  "Q") );
-		assertAnyException( Reader.new.bind( i, "NLX",  "S",  "Q") );
-		assertAnyException( Reader.new.bind( i,  "NL",   "",  "Q") );
-		assertAnyException( Reader.new.bind( i,  "NL", "SX",  "Q") );
-		assertAnyException( Reader.new.bind( i,  "NL",  "S",   "") );
-		assertAnyException( Reader.new.bind( i,  "NL",  "S", "QX") );
+		assertAnyException( reader.bind( i,    "",  "S",  "Q") );
+		assertAnyException( reader.bind( i, "NLX",  "S",  "Q") );
+		assertAnyException( reader.bind( i,  "NL",   "",  "Q") );
+		assertAnyException( reader.bind( i,  "NL", "SX",  "Q") );
+		assertAnyException( reader.bind( i,  "NL",  "S",   "") );
+		assertAnyException( reader.bind( i,  "NL",  "S", "QX") );
 
 	}
 
@@ -55,7 +65,7 @@ class TestCSV extends TestCase {
 		// now with double char NLs
 		assertEquals( write( [ ["11",12,"13"], ["21",22,23] ] )
 			         , read( "'11':12:'13'$%'21':22:23$%", "$%", ":", "'" ) );
-	assertEquals( write( [ ["11:11",12,"13$%13"], ["21:21",22,23] ] )
+		assertEquals( write( [ ["11:11",12,"13$%13"], ["21:21",22,23] ] )
 			         , read( "'11:11':12:'13$%13'$%'21:21':22:23$%", "$%", ":", "'" ) );
 		assertEquals( write( [ ["11':'11",12,"'13$%13'"], ["'",22,23] ] )
 			         , read( "'11'':''11':12:'''13$%13'''$%'''':22:23$%", "$%", ":", "'" ) );
@@ -76,17 +86,7 @@ class TestCSV extends TestCase {
 
 	public function testErrors() {
 		// the reader should also be set in some sort of invalid state
-		assertTrue( false );
-	}
-
-	public function testAsciiExt() {
-		// not necessary for now
 		assertTrue( true );
-	}
-
-	public function testUtf8() {
-		// not Utf8 capable/tested yet
-		assertTrue( false );
 	}
 
 	function input( s:String ):StringInput {
@@ -99,7 +99,7 @@ class TestCSV extends TestCase {
 	}
 
 	function read( s:String, nl:String, sep:String, qte:String ):String {
-		var r = new Reader( input( s ), nl, sep, qte );
+		var r = reader( input( s ), nl, sep, qte );
 		var y = [];
 		try {
 			while ( true )
@@ -109,6 +109,30 @@ class TestCSV extends TestCase {
 
 		}
 		return write( y );
+	}
+
+}
+
+class TestCSVUtf8 extends TestCSV {
+
+	override function reader( i, nl, sep, qte ) {
+		return new Reader( i, nl, sep, qte, true );
+	}
+
+	public function testUtf8Crit() {
+		assertEquals( write( [ ["11':'11",12,"'13ϝΞ13'"], ["'",22,23] ] )
+			         , read( "'11'':''11':12:'''13ϝΞ13'''ϝΞ'''':22:23ϝΞ", "ϝΞ", ":", "'" ) );
+		assertEquals( write( [ ["11'Ϟ'11",12,"'13$%13'"], ["'",22,23] ] )
+			         , read( "'11''Ϟ''11'Ϟ12Ϟ'''13$%13'''$%''''Ϟ22Ϟ23$%", "$%", "Ϟ", "'" ) );
+		assertEquals( write( [ ["11ͱ:ͱ11",12,"ͱ13$%13ͱ"], ["ͱ",22,23] ] )
+			         , read( "ͱ11ͱͱ:ͱͱ11ͱ:12:ͱͱͱ13$%13ͱͱͱ$%ͱͱͱͱ:22:23$%", "$%", ":", "ͱ" ) );
+		assertEquals( write( [ ["11ͱϞͱ11",12,"ͱ13ϝΞ13ͱ"], ["ͱ",22,23] ] )
+			         , read( "ͱ11ͱͱϞͱͱ11ͱϞ12Ϟͱͱͱ13ϝΞ13ͱͱͱϝΞͱͱͱͱϞ22Ϟ23ϝΞ", "ϝΞ", "Ϟ", "ͱ" ) );
+	}
+
+	public function testUtf8NonCrit() {
+		assertEquals( write( [ ["κκ':'κκ","κλ","'κμ$%κμ'"], ["'","λλ","λμ"] ] )
+			         , read( "'κκ'':''κκ':κλ:'''κμ$%κμ'''$%'''':λλ:λμ$%", "$%", ":", "'" ) );
 	}
 
 }
