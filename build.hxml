@@ -1,0 +1,43 @@
+# Unit tests
+
+# Target: Neko
+
+-neko exp/unit_tests/neko/unit_tests.n
+-main Main
+-cp src
+-cp test
+-D dump
+-D TESTCSV
+
+# Target: Hxcpp
+
+--next
+
+-cpp exp/unit_tests/cpp/local64/
+-main Main
+-cp src
+-cp test
+-D dump
+-D TESTCSV
+-D HXCPP_M64
+
+--next
+
+-cpp exp/unit_tests/cpp/local32/
+-main Main
+-cp src
+-cp test
+-D dump
+-D TESTCSV
+-D HXCPP_M32
+
+# Target: Java
+
+--next
+
+-java exp/unit_tests/java/
+-main Main
+-cp src
+-cp test
+-D dump
+-D TESTCSV
