@@ -4,17 +4,17 @@ import haxe.io.*;
 
 class Reader {
 
+	var utf8:Bool;
 	var typeTable:CharTypeTable;
-
 	var input:Input;
 	
 	var state:ReaderState;
 
 	public function new( _input:Input, ?newline="\n", ?separator=",", ?quote="\"", ?_utf8=false ) {
 
+		utf8 = _utf8;
+		typeTable = new CharTypeTable( utf8 );
 		input = _input;
-		
-		typeTable = new CharTypeTable( _utf8 );
 		
 		state = StartFile;
 
@@ -254,7 +254,7 @@ class Reader {
 	}
 
 	function readChar( i:Input ):Char {
-		if ( typeTable.utf8 ) {
+		if ( utf8 ) {
 			var b = i.readByte();
 			if ( b > 127 )
 				b = b << 8 | i.readByte();
@@ -286,7 +286,7 @@ class Reader {
 	function printChar( char:Char ):String {
 		if ( char >= 0x20 && char <= 0x7e )
 			return String.fromCharCode( char );
-		else if ( typeTable.utf8 && char > 255 ) {
+		else if ( utf8 && char > 255 ) {
 			var b = new BytesBuffer();
 			addChar( b, char );
 			return b.getBytes().toString();
@@ -304,17 +304,18 @@ class Reader {
 #if (!TESTCSV) private #end class CharTypeTable {
 	
 	var charType:Array<CharType>;
-	public var utf8( default, null ):Bool;
+	var max:Int;
 
-	public function new( ?_utf8=false ) {
+	public function new( utf8 ) {
+		max = utf8 ? 0xffff : 0xff;
 		charType = [];
-		utf8 = _utf8;
+		charType[max+1] = EOF;
 	}
 
 	public function get( char:Char ):CharType {
 		if ( char < 0 )
 			return EOF;
-		else if ( char < 256 || utf8 ) {
+		else if ( char <= max ) {
 			var t = charType[char];
 			return t != null ? t : OTHER;
 		}
@@ -323,7 +324,7 @@ class Reader {
 	}
 
 	public function set( char:Char, type:CharType ):Void {
-		if ( char < 0 )
+		if ( char < 0 || char > max )
 			throw 'Cannot set char type for char $char';
 		charType[char] = type;
 	}
