@@ -1,9 +1,10 @@
 import format.csv.Reader;
 import haxe.io.Eof;
 import haxe.io.StringInput;
+import haxe.Timer;
 
 @:access( format.csv.Reader )
-class TestCSV extends TestCase {
+class TestCSVReader extends TestCase {
 
 	function reader( i, nl, sep, qte ) {
 		return new Reader( i, nl, sep, qte );
@@ -105,15 +106,13 @@ class TestCSV extends TestCase {
 			while ( true )
 				y.push( r.readRecord() );
 		}
-		catch ( e:Eof ) {
-
-		}
+		catch ( e:Eof ) { }
 		return write( y );
 	}
 
 }
 
-class TestCSVUtf8 extends TestCSV {
+class TestCSVReaderUtf8 extends TestCSVReader {
 
 	override function reader( i, nl, sep, qte ) {
 		return new Reader( i, nl, sep, qte, true );
@@ -131,8 +130,55 @@ class TestCSVUtf8 extends TestCSV {
 	}
 
 	public function testUtf8NonCrit() {
-		assertEquals( write( [ ["κκ':'κκ","κλ","'κμ$%κμ'"], ["'","λλ","λμ"] ] )
-			         , read( "'κκ'':''κκ':κλ:'''κμ$%κμ'''$%'''':λλ:λμ$%", "$%", ":", "'" ) );
+		assertEquals( write( [ ["κκ':'κκ","κλ","'κμ<>κμ'"], ["'","λλ","λμ"] ] )
+			         , read( "'κκ'':''κκ':κλ:'''κμ<>κμ'''<>'''':λλ:λμ<>", "<>", ":", "'" ) );
+	}
+
+	public function test3ByteUtf8() {
+		assertEquals( write( [ ["1ઁ1","1ઁ2","1ઁ3" ], ["2ઁ1","2ઁ2","2ઁ3"] ] )
+			         , read( "1ઁ1:1ઁ2:1ઁ3<>2ઁ1:2ઁ2:2ઁ3", "<>", ":", "'" ) );
+	}
+
+	public function test4ByteUtf8() {
+		assertEquals( write( [ ["1𐅄1","1𐅄2","1𐅄3" ], ["2𐅄1","2𐅄2","2𐅄3"] ] )
+			         , read( "1𐅄1:1𐅄2:1𐅄3<>2𐅄1:2𐅄2:2𐅄3", "<>", ":", "'" ) );
+	}
+
+}
+
+class MeasureCSVReader extends TestCase {
+
+	function input( utf8 ) {
+		var s = new StringBuf();
+		for ( x in 0...10000 )
+			if ( utf8 )
+				s.add( "'11'':''11':12:'''13<>13'''<>'''':22:23<>" );
+			else
+				"1𐅄1:1𐅄2:1𐅄3<>2𐅄1:2𐅄2:2𐅄3";
+		return new StringInput( s.toString() );
+	}
+
+	function measure( utf8 ) {
+		var r = new Reader( input( utf8 ), "<>", ":", "'", utf8 );
+		var t0 = Timer.stamp();
+		try {
+			while ( true )
+				r.readRecord();
+		}
+		catch ( e:Eof ) { }
+		var t1 = Timer.stamp();
+		return 1e-4*( t1 - t0 );
+	}
+
+
+	public function testAscii() {
+		trace( "\nMeasureCSVReader ASCII: "+measure( false ) );
+		assertTrue( true );
+	}
+
+	public function testUtf8() {
+		trace( "\nMeasureCSVReader UTF-8: "+measure( true ) );
+		assertTrue( true );
 	}
 
 }

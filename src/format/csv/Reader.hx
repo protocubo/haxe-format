@@ -1,6 +1,7 @@
 package format.csv;
 
 import haxe.io.*;
+import format.csv.Error;
 
 class Reader {
 
@@ -13,7 +14,7 @@ class Reader {
 	public function new( _input:Input, ?newline="\n", ?separator=",", ?quote="\"", ?_utf8=false ) {
 
 		utf8 = _utf8;
-		typeTable = new CharTypeTable( utf8 );
+		typeTable = new CharTypeTable();
 		input = _input;
 		
 		state = StartFile;
@@ -23,6 +24,8 @@ class Reader {
 		case 1:
 			typeTable.set( nl[0], NL0_noNL1 );
 		case 2:
+			if ( nl[0] == nl[1] )
+				throw "Cannot work with repeated chars on the newline sequence";
 			typeTable.set( nl[0], NL0 );
 			typeTable.set( nl[1], NL1 );
 		case all:
@@ -64,20 +67,22 @@ class Reader {
 
 		var record:Array<String> = [];
 		var field:BytesBuffer = null;
-		var cur:Char = EOF_CHAR;
-		var pre:Char = EOF_CHAR;
+		var cur:Char = 0;
+		var pre:Char = 0;
+		var curType:CharType = EOF;
 		while ( true ) {
 
 			pre = cur;
 			try {
 				cur = readChar( input );
+				curType = typeTable.get( cur );
 			}
 			catch ( eof:Eof ) {
-				cur = EOF_CHAR;
+				curType = EOF;
 			}
-			// trace( [ printChar( cur ), typeTable.get( cur ), state ] );
+			// trace( [ printChar( cur ), curType, state ] );
 			
-			switch ( typeTable.get( cur ) ) {
+			switch ( curType ) {
 			case NL0:
 
 				switch ( state ) {
@@ -255,13 +260,61 @@ class Reader {
 
 	function readChar( i:Input ):Char {
 		if ( utf8 ) {
-			var b = i.readByte();
-			if ( b > 127 )
-				b = b << 8 | i.readByte();
-			return b;
+
+			var char:Int = -1;
+			try {
+				char = readUtf8Start( i );
+			}
+			catch ( e:CSVUtf8Error ) { // format.csv.Error.CSVUtf8Error
+				return 0xfffd; // �
+			}
+
+			if ( char & 0x80 == 0 ) // single byte char
+				return char;
+			else
+
+			try {
+
+				if ( char & 0xe0 == 0xc0 ) // 2 byte char
+					return char
+					       << 8 | readUtf8Continuation( i );
+				else if ( char & 0xf0 == 0xe0 ) // 3 byte char
+					return ( char << 8 | readUtf8Continuation( i ) )
+					       << 8 | readUtf8Continuation( i );
+				else if ( char & 0xf8 == 0xf0 ) // 4 byte char
+					return ( ( char << 8 | readUtf8Continuation( i ) )
+					         << 8 | readUtf8Continuation( i ) )
+					       << 8 | readUtf8Continuation( i );
+				else
+					throw BadStartByte( char );
+
+			}
+			catch ( e:CSVUtf8Error ) { // format.csv.Error.CSVUtf8Error
+				return 0xfffd; // �
+			}
+			catch ( e:Eof ) {
+				return 0xfffd; // �
+			}
+
 		}
 		else
 			return i.readByte();
+	}
+
+	function readUtf8Start( i:Input ):Int {
+		var b = i.readByte();
+		// trace( [ b, b&0xc0, 0x80 ] );
+		if ( b & 0xc0 == 0x80 ) // continuation byte
+			throw BadStartByte( b );
+		return b;
+	}
+
+	function readUtf8Continuation( i:Input ):Int {
+		var b = i.readByte();
+		// trace( [ b, b&0x80, 0x80 ] );
+		if ( b & 0x80 != 0x80 ) // 10xx xxxx
+			throw BadContinuationByte( b );
+		return b;
 	}
 
 	function readAllChars( i:Input ):Array<Char> {
@@ -275,12 +328,13 @@ class Reader {
 	}
 
 	function addChar( buf:BytesBuffer, c:Char ) {
-		if ( c > 255 ) {
-			buf.addByte( c >> 8 );
-			buf.addByte( c & 0xff );
-		}
-		else
-			buf.addByte( c );
+		if ( c & 0xff000000 != 0 )
+			buf.addByte( c >> 24 & 0xff );
+		if ( c & 0xff0000 != 0 )
+			buf.addByte( c >> 16 & 0xff );
+		if ( c & 0xff00 != 0 )
+			buf.addByte( c >> 8 & 0xff );
+		buf.addByte( c & 0xff );
 	}
 
 	function printChar( char:Char ):String {
@@ -294,39 +348,44 @@ class Reader {
 		else
 			return "#" + char;
 	}
-
-	static inline var EOF_CHAR = -1;
-
 }
 
 #if (!TESTCSV) private #end typedef Char = Int;
 
 #if (!TESTCSV) private #end class CharTypeTable {
 	
-	var charType:Array<CharType>;
-	var max:Int;
+	var charType:Array<CharTypeKeyVal>;
 
-	public function new( utf8 ) {
-		max = utf8 ? 0xffff : 0xff;
+	public function new() {
 		charType = [];
-		charType[max+1] = EOF;
 	}
 
 	public function get( char:Char ):CharType {
-		if ( char < 0 )
-			return EOF;
-		else if ( char <= max ) {
-			var t = charType[char];
-			return t != null ? t : OTHER;
-		}
-		else
-			return OTHER;
+		for ( x in charType )
+			if ( char == x.char )	
+				return x.type;
+		return OTHER;
 	}
 
 	public function set( char:Char, type:CharType ):Void {
-		if ( char < 0 || char > max )
-			throw 'Cannot set char type for char $char';
-		charType[char] = type;
+		switch ( get( char ) ) {
+		case OTHER:
+			charType.push( new CharTypeKeyVal( char, type ) );
+		case all:
+			throw 'Char type $type already registred';
+		}
+	}
+
+}
+
+#if (!TESTCSV) private #end class CharTypeKeyVal {
+
+	public var char( default, null ):Char;
+	public var type( default, null ):CharType;
+
+	public function new( _char:Char, _type:CharType ) {
+		char = _char;
+		type = _type;
 	}
 
 }

@@ -2,7 +2,12 @@ class Main {
 
 	function new() {
 		var runner = new haxe.unit.TestRunner();
-		for ( t in [ new TestCSV(), new TestCSV.TestCSVUtf8() ] )
+		var tests = [
+			new TestCSV.TestCSVReader()
+		 , new TestCSV.TestCSVReaderUtf8()
+		 , new TestCSV.MeasureCSVReader()
+		];
+		for ( t in tests )
 			runner.add( t );
 		runner.run();
 	}
