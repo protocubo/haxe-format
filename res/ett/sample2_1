@@ -1,0 +1,11 @@
+NEWLINE-
+CODING-ISO
+SEPARATOR-|
+ESCAPE-"
+CLASS-Elebeta:RodoTollSim:Link
+Int|        Int|         Int|   Float|   Int|Float
+ id|startNodeId|finishNodeId|distance|typeId| toll
+  1|          1|           2|      69|    50|    0
+  2|          2|           1|      81|    30|  3.0
+  3|          2|           3|     159|    70|    0
+  4|          3|           2|     158|    80|    0

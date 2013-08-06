@@ -8,6 +8,14 @@
 -cp test
 -D dump
 -D TESTCSV
+-resource res/ett/sample1_1@res/ett/sample1_1
+-resource res/ett/data1_1@res/ett/data1_1
+-resource res/ett/sample1_2@res/ett/sample1_2
+-resource res/ett/data1_1@res/ett/data1_2
+-resource res/ett/sample2_1@res/ett/sample2_1
+# -resource res/ett/data2_1@res/ett/data2_1
+-resource res/ett/sample2_2@res/ett/sample2_2
+# -resource res/ett/data2_2@res/ett/data2_2
 
 # Target: Hxcpp
 
@@ -20,6 +28,15 @@
 -D dump
 -D TESTCSV
 -D HXCPP_M64
+-resource res/ett/sample1_1@res/ett/sample1_1
+-resource res/ett/data1_1@res/ett/data1_1
+-resource res/ett/sample1_2@res/ett/sample1_2
+-resource res/ett/data1_1@res/ett/data1_2
+-resource res/ett/sample2_1@res/ett/sample2_1
+# -resource res/ett/data2_1@res/ett/data2_1
+-resource res/ett/sample2_2@res/ett/sample2_2
+# -resource res/ett/data2_2@res/ett/data2_2
+
 
 --next
 
@@ -30,6 +47,15 @@
 -D dump
 -D TESTCSV
 -D HXCPP_M32
+-resource res/ett/sample1_1@res/ett/sample1_1
+-resource res/ett/data1_1@res/ett/data1_1
+-resource res/ett/sample1_2@res/ett/sample1_2
+-resource res/ett/data1_1@res/ett/data1_2
+-resource res/ett/sample2_1@res/ett/sample2_1
+# -resource res/ett/data2_1@res/ett/data2_1
+-resource res/ett/sample2_2@res/ett/sample2_2
+# -resource res/ett/data2_2@res/ett/data2_2
+
 
 # Target: Java
 
@@ -41,3 +67,11 @@
 -cp test
 -D dump
 -D TESTCSV
+-resource res/ett/sample1_1@res/ett/sample1_1
+-resource res/ett/data1_1@res/ett/data1_1
+-resource res/ett/sample1_2@res/ett/sample1_2
+-resource res/ett/data1_1@res/ett/data1_2
+-resource res/ett/sample2_1@res/ett/sample2_1
+# -resource res/ett/data2_1@res/ett/data2_1
+-resource res/ett/sample2_2@res/ett/sample2_2
+# -resource res/ett/data2_2@res/ett/data2_2

@@ -1,7 +1,11 @@
-import format.csv.Reader;
+package ;
+
 import haxe.io.Eof;
 import haxe.io.StringInput;
 import haxe.Timer;
+
+import format.csv.Error;
+import format.csv.Reader;
 
 @:access( format.csv.Reader )
 class TestCSVReader extends TestCase {
