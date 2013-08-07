@@ -1,0 +1,6 @@
+# Only should be used by build.hxml, on that folder.
+
+-main Main
+-cp src
+-cp test
+-D dump

@@ -1,0 +1,7 @@
+-java exp/unit_tests/java/
+-main Main
+-cp src
+-cp test
+-D dump
+-D TESTCSV
+res/ett/add.hxml

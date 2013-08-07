@@ -1,6 +1,9 @@
 package format.ett;
 
+import format.ett.Data;
+
 enum ETTReaderError {
+	
 	// Generic error
 	GenericError( msg:String );
 
@@ -23,4 +26,21 @@ enum ETTReaderError {
 	
 	// CLASS setting errors
 	NoClassTag;
+
+	// Basic table header errors
+	EmptyColumnName( columnNo:Int ); // starting at 1
+	EmptyColumnType( columnNo:Int ); // starting at 1
+
+	// Table typing errors
+	NullOfNull( t:Type );
+	TrimOfNull( t:Type );
+	InvalidTrim( t:Type );
+	UnknownType( fieldType:String );
+
+	// Data typing errors
+	GenericTypingError( e:Dynamic, field:Field );
+	InvalidBoolean( str:String, field:Field );
+	NotNullable( field:Field );
+	CannotParse( field:Field );
+
 }

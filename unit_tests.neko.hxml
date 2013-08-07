@@ -1,0 +1,7 @@
+-neko exp/unit_tests/neko/unit_tests.n
+-main Main
+-cp src
+-cp test
+-D dump
+-D TESTCSV
+res/ett/add.hxml

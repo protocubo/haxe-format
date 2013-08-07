@@ -1,0 +1,8 @@
+-cpp exp/unit_tests/cpp/local/
+-main Main
+-cp src
+-cp test
+-D dump
+-D TESTCSV
+-D HXCPP_M32
+res/ett/add.hxml

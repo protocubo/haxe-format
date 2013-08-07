@@ -1,5 +1,7 @@
 import haxe.PosInfos;
 
+import haxe.Serializer;
+
 class TestCase extends haxe.unit.TestCase {
 
 	function assertException( expected:Dynamic, func:Void->Void, ?c:PosInfos ) {
@@ -63,6 +65,16 @@ class TestCase extends haxe.unit.TestCase {
 		if ( !Math.isNaN( value ) ) {
 			currentTest.success = false;
 			currentTest.error   = "expected 'Math.NaN' but was '" + value + "'";
+			currentTest.posInfos = c;
+			throw currentTest;
+		}
+	}
+
+	function assertEqualSerialized( expected:Dynamic, actual:Dynamic, ?c:PosInfos ) : Void 	{
+		currentTest.done = true;
+		if ( Serializer.run( expected ) != Serializer.run( actual ) ) {
+			currentTest.success = false;
+			currentTest.error   = "expected '" + expected + "' but was '" + actual + "'";
 			currentTest.posInfos = c;
 			throw currentTest;
 		}

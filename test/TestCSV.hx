@@ -171,7 +171,7 @@ class MeasureCSVReader extends TestCase {
 		}
 		catch ( e:Eof ) { }
 		var t1 = Timer.stamp();
-		return 1e-4*( t1 - t0 );
+		return 5e-5*( t1 - t0 );
 	}
 
 

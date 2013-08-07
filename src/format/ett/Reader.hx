@@ -15,11 +15,22 @@ class Reader {
 	public var info:FileInfo;
 	var csvReader:CSVReader;
 
+	var context:Int;
+
 	public function new( _input:Input ) {
-
 		readFileInfo( _input );
-		// trace( "\n"+info );
+	}
 
+	public function readRecord():Dynamic {
+		var data = csvReader.readRecord();
+		if ( data.length != info.fields.length )
+			throw GenericError( 'Expected #fields = ${info.fields.length} but was ${data.length}' );
+		var r:Dynamic = cast {};
+		for ( i in 0...info.fields.length ) {
+			context = i;
+			Reflect.setField( r, info.fields[i].name, parseData( data[i], info.fields[i].type ) );
+		}
+		return r;
 	}
 
 	function readFileInfo( input:Input ):Void {
@@ -86,25 +97,13 @@ class Reader {
 
 		for ( i in 0...types.length ) {
 			if ( columns[i].length == 0 )
-				throw GenericError( "Column name cannot be null" );
+				throw EmptyColumnName( i+1 );
 			if ( types[i].length == 0 )
-				throw GenericError( "Type cannot be null" );
-			var type = parseType( types[i] );
-			validateType( type );
+				throw EmptyColumnType( i+1 );
+			var type = validateType( parseType( types[i] ) );
 			info.fields.push( new Field( columns[i], type ) );
 			// trace( info );
 		}
-	}
-
-	public function readRecord():Dynamic {
-		var data = csvReader.readRecord();
-		if ( data.length != info.fields.length )
-			throw GenericError( 'Expected #fields = ${info.fields.length} but was ${data.length}' );
-		var r:Dynamic = cast {};
-		for ( i in 0...info.fields.length ) {
-			Reflect.setField( r, info.fields[i].name, parseData( data[i], info.fields[i].type ) );
-		}
-		return r;
 	}
 
 	function readUntil( input:Input, k:String, exception:ETTReaderError ):Bytes {
@@ -126,24 +125,30 @@ class Reader {
 					break;
 				i++;
 			}
-			if ( i == kb.length )
-				return buf.getBytes().sub( 0, buf.length - kb.length );
+			if ( i == kb.length ) {
+				var bufLen = buf.length;
+				return buf.getBytes().sub( 0, bufLen - kb.length );
+			}
 		}
 		return null;
 	}
 
-	function parseType( s:String ):Type {
+	/* 
+	 * Recursively parses a type definition.
+	 * Returns TUnknown( typeDef ) if the type is unknown.
+	 */
+	function parseType( typeDef:String ):Type {
 		var nullable = ~/^Null<(.+)>$/;
-		if ( nullable.match( s ) ) {
+		if ( nullable.match( typeDef ) ) {
 			return TNull( parseType( nullable.matched( 1 ) ) );
 		}
 
 		var trimmable = ~/^Trim<(.+)>$/;
-		if ( trimmable.match( s ) ) {
+		if ( trimmable.match( typeDef ) ) {
 			return TTrim( parseType( trimmable.matched( 1 ) ) );
 		}
 
-		return switch ( s ) {
+		return switch ( typeDef ) {
 		case "Bool": TBool;
 		case "Int": TInt;
 		case "Float": TFloat;
@@ -151,57 +156,78 @@ class Reader {
 		case "Date": TDate;
 		case "Timestamp": TTimestamp;
 		case "HaxeSerial": THaxeSerial;
-		case all: throw GenericError( "Unknown type "+all );
+		case all: TUnknown( all );
 		};
 	}
 	
-	function validateType( t:Type ):Void {
-		switch ( t ) {
-		case TNull( TNull( _ ) ): throw GenericError( "Null<Null<... not allowed" );
-		case TNull( _ ): // ok
-		case TTrim( TString ): // ok
-		case TTrim( TNull( _ ) ): throw GenericError( "Trim<Null<... not allowed" );
-		case TTrim( _ ): throw GenericError( "Only Trim<String> is allowed" );
-		case all: // ok
-		}
+	/* 
+	 * Recursively validades a type.
+	 */
+	function validateType( t:Type ):Type {
+		return switch ( t ) {
+		case TNull( TNull( _ ) ): throw NullOfNull( t );
+		case TNull( it ): validateType( it );
+		case TTrim( TString ): t;
+		case TTrim( TNull( _ ) ): throw TrimOfNull( t );
+		case TTrim( _ ): throw InvalidTrim( t );
+		case TUnknown( ts ): throw UnknownType( ts );
+		case all: t;
+		};
 	}
 
+	/* 
+	 * Parses a field string value [s] using type [t].
+	 */
 	function parseData( s:String, t:Type ):Dynamic {
 		return switch ( t ) {
 		case TNull( t ):
 			s.length != 0 ? parseData( s, t ) : null;
 		case TBool:
-			switch ( parseString( s, true ) ) {
+			switch ( getString( s, true ) ) {
 			case "true": true;
 			case "false": false;
-			case _: throw GenericError( "Invalid boolean "+s );
+			case _: throw InvalidBoolean( s, info.fields[context] );
 			};
 		case TInt:
-			Std.parseInt( parseString( s, true ) );
+			s = getString( s, true );
+			try { Std.parseInt( s ); }
+			catch ( e:Dynamic ) { throw GenericTypingError( e, info.fields[context] ); }
 		case TFloat:
-			Std.parseFloat( parseString( s, true ) );
+			s = getString( s, true );
+			try { Std.parseFloat( s ); }
+			catch ( e:Dynamic ) { throw GenericTypingError( e, info.fields[context] ); }
 		case TTrim( TString ):
-			parseData( parseString( s, true ), TString );
+			parseData( getString( s, true ), TString );
 		case TString:
-			parseString( s, false );
+			getString( s, false );
 		case TDate:
-			Date.fromString( parseString( s, true ) );
+			s = getString( s, true );
+			try { Date.fromString( s ); }
+			catch ( e:Dynamic ) { throw GenericTypingError( e, info.fields[context] ); }
 		case TTimestamp:
-			Date.fromTime( parseData( s, TFloat ) );
+			var tstamp = parseData( s, TFloat );
+			try { Date.fromTime( tstamp ); }
+			catch ( e:Dynamic ) { throw GenericTypingError( e, info.fields[context] ); }
 		case THaxeSerial:
-			Unserializer.run( parseString( s, true ) );
-		case _:
-			throw GenericError( "Cannot read data with type "+t );
+			s = getString( s, true );
+			try { Unserializer.run( s ); }
+			catch ( e:Dynamic ) { throw GenericTypingError( e, info.fields[context] ); }
+		case all:
+			throw CannotParse( info.fields[context] );
 		};
 	}
 
-	function parseString( s:String, trimmed:Bool ):String {
+	/* 
+	 * Reads a trimmed or not String and checks for nulls.
+	 * If the result would later become null, raises NotNullable( field ).
+	 */
+	function getString( s:String, trimmed:Bool ):String {
 		if ( trimmed )
 			s = trim( s );
 		if ( s.length != 0 )
 			return s;
 		else
-			throw GenericError( "Null not allowed for this field" );
+			throw NotNullable( info.fields[context] );
 	}
 
 }

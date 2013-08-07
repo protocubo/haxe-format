@@ -62,4 +62,5 @@ enum Type {
 	TTimestamp;
 	THaxeSerial;
 	TTrim( s:Type );
+	TUnknown( typeName:String );
 }
