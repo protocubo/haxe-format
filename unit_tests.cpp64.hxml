@@ -1,6 +1,5 @@
 -cpp exp/unit_tests/cpp/local64/
 -main Main
--cp src
 -cp test
 -D dump
 -D TESTCSV
