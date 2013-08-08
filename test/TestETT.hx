@@ -42,10 +42,10 @@ class TestETTReader extends TestCase {
 		r.info.fields = [ new Field( "test", TUnknown("test" ) ) ];
 		r.context = 0;
 
-		// success
+		// successes
 		assertNoException( r.parseData.bind( " ", TString ) );
 
-		// failures
+		// expected failures
 		assertAnyException( r.parseData.bind( "", TBool ) );
 		assertAnyException( r.parseData.bind( " ", TBool ) );
 		assertAnyException( r.parseData.bind( "", TInt ) );
@@ -85,6 +85,78 @@ class TestETTReader extends TestCase {
 		assertEquals( null, r.parseData( " ", TNull(THaxeSerial) ) );
 		assertEquals( null, r.parseData( "", TNull(TTrim(TString)) ) );
 		assertEquals( null, r.parseData( " ", TNull(TTrim(TString)) ) );
+	}
+
+	public function testParseBool() {
+		var r = TypeTools.createEmptyInstance( Reader );
+		r.info = new FileInfo();
+		r.info.fields = [ new Field( "test", TUnknown("test" ) ) ];
+		r.context = 0;
+
+		// successes
+		assertEquals( true, r.parseData( "true", TBool ) );
+		assertEquals( true, r.parseData( " true ", TBool ) );
+		assertEquals( false, r.parseData( "false", TBool ) );
+		assertEquals( false, r.parseData( " false ", TBool ) );
+
+		// expected failures
+		assertAnyException( r.parseData.bind( "a true", TBool ) );
+		assertAnyException( r.parseData.bind( "true a", TBool ) );
+	}
+
+	public function testParseInt() {
+		var r = TypeTools.createEmptyInstance( Reader );
+		r.info = new FileInfo();
+		r.info.fields = [ new Field( "test", TUnknown("test" ) ) ];
+		r.context = 0;
+
+		// successes
+		assertEquals( 42, r.parseData( "42", TInt ) );
+		assertEquals( 42, r.parseData( "042", TInt ) );
+		assertEquals( 42, r.parseData( "+042", TInt ) );
+		assertEquals( 42, r.parseData( " 42 ", TInt ) );
+		assertEquals( 42, r.parseData( "0x2a", TInt ) );
+
+		// expected failures
+		// currently all of these succeed on neko and C++!
+		// trace( "Std.parseInt( 'a 42' ):" + Std.parseInt( "a 42" ) );
+		// trace( "Std.parseInt( '42 a' ):" + Std.parseInt( "42 a" ) );
+		// assertAnyException( r.parseData.bind( "a 42", TInt ) );
+		// assertAnyException( r.parseData.bind( "42 a", TInt ) );
+	}
+
+	public function testParseFloat() {
+		var r = TypeTools.createEmptyInstance( Reader );
+		r.info = new FileInfo();
+		r.info.fields = [ new Field( "test", TUnknown("test" ) ) ];
+		r.context = 0;
+
+		// successes
+		assertEquals( 42.42, r.parseData( "42.42", TFloat ) );
+		assertEquals( 42.42, r.parseData( "042.42", TFloat ) );
+		assertEquals( 42.42, r.parseData( "+042.42", TFloat ) );
+		assertEquals( 42.42, r.parseData( " 42.42 ", TFloat ) );
+
+		// expected failures
+		// currently all of these succeed on neko and C++!
+		// trace( "Std.parseFloat( 'a 42.42' ):" + Std.parseFloat( "a 42.42" ) );
+		// trace( "Std.parseFloat( '42.42 a' ):" + Std.parseFloat( "42.42 a" ) );
+		// assertAnyException( r.parseData.bind( "a 42.42", TFloat ) );
+		// assertAnyException( r.parseData.bind( "42.42 a", TFloat ) );
+	}
+
+	public function testParseString() {
+		var r = TypeTools.createEmptyInstance( Reader );
+		r.info = new FileInfo();
+		r.info.fields = [ new Field( "test", TUnknown("test" ) ) ];
+		r.context = 0;
+
+		assertEquals( "42", r.parseData( "42", TString ) );
+		assertEquals( "42", r.parseData( "42", TNull(TString) ) );
+		assertEquals( " 42 ", r.parseData( " 42 ", TString ) );
+		assertEquals( " 42 ", r.parseData( " 42 ", TNull(TString) ) );
+		assertEquals( "42", r.parseData( " 42 ", TTrim(TString) ) );
+		assertEquals( "42", r.parseData( " 42 ", TNull(TTrim(TString)) ) );
 	}
 
 	function getSample( major:Int, minor:Int ):BytesInput {

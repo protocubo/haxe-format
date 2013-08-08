@@ -3,5 +3,7 @@
 -cp test
 -D dump
 -D TESTCSV
+-D HXCPP_STACK_TRACE
+-D HXCPP_STACK_LINE
 -D HXCPP_M64
 res/ett/add.hxml
