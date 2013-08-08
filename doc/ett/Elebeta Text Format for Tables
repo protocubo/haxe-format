@@ -116,7 +116,9 @@ Elebeta Text Format for Tables
 
 3.2  Null encoding
 
-     Blank field.
+     Blank field (empty string) is always null.
+
+     For trimmed fields, an empty trimmed string will also result in null.
 
 3.3  Boolean encoding
 

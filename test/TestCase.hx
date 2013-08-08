@@ -36,6 +36,11 @@ class TestCase extends haxe.unit.TestCase {
 		}
 	}
 
+	function assertNoException( func:Void->Void, ?c:PosInfos ) {
+		currentTest.done = true;
+		func();
+	}
+
 	function assertEqualArrays<T>( expected:Array<T>, value:Array<T> ) {
 		assertEquals( expected.toString(), value.toString() );
 	}

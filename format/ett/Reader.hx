@@ -166,7 +166,7 @@ class Reader {
 	function validateType( t:Type ):Type {
 		return switch ( t ) {
 		case TNull( TNull( _ ) ): throw NullOfNull( t );
-		case TNull( it ): validateType( it );
+		case TNull( it ): TNull( validateType( it ) );
 		case TTrim( TString ): t;
 		case TTrim( TNull( _ ) ): throw TrimOfNull( t );
 		case TTrim( _ ): throw InvalidTrim( t );
@@ -178,56 +178,104 @@ class Reader {
 	/* 
 	 * Parses a field string value [s] using type [t].
 	 */
-	function parseData( s:String, t:Type ):Dynamic {
+	inline function parseData( s:String, t:Type ):Dynamic
+		return _parseData( s, t, false );
+	function _parseData( s:String, t:Type, nullable:Bool ):Dynamic {
 		return switch ( t ) {
 		case TNull( t ):
-			s.length != 0 ? parseData( s, t ) : null;
+
+			_parseData( s, t, true );
+
 		case TBool:
-			switch ( getString( s, true ) ) {
-			case "true": true;
-			case "false": false;
-			case _: throw InvalidBoolean( s, info.fields[context] );
+
+			switch ( trim( s ) ) {
+			case "true":
+				true;
+			case "false":
+				false;
+			case "":
+				if ( nullable ) null else throw NotNullable( info.fields[context] );
+			case _:
+				throw InvalidBoolean( s, info.fields[context] );
 			};
+
 		case TInt:
-			s = getString( s, true );
-			try { Std.parseInt( s ); }
-			catch ( e:Dynamic ) { throw GenericTypingError( e, info.fields[context] ); }
+
+			s = trim( s );
+			if ( s.length != 0 )
+				encaps( Std.parseInt, s );
+			else if ( nullable )
+				null;
+			else
+				throw NotNullable( info.fields[context] );
+
 		case TFloat:
-			s = getString( s, true );
-			try { Std.parseFloat( s ); }
-			catch ( e:Dynamic ) { throw GenericTypingError( e, info.fields[context] ); }
+
+			s = trim( s );
+			if ( s.length != 0 )
+				encaps( Std.parseFloat, s );
+			else if ( nullable )
+				null;
+			else
+				throw NotNullable( info.fields[context] );
+
 		case TTrim( TString ):
-			parseData( getString( s, true ), TString );
+
+			s = trim( s );
+			_parseData( trim( s ), TString, nullable );
+
 		case TString:
-			getString( s, false );
+
+			if ( s.length != 0 )
+				s;
+			else if ( nullable )
+				null;
+			else
+				throw NotNullable( info.fields[context] );
+
 		case TDate:
-			s = getString( s, true );
-			try { Date.fromString( s ); }
-			catch ( e:Dynamic ) { throw GenericTypingError( e, info.fields[context] ); }
+
+			s = trim( s );
+			if ( s.length != 0 )
+				encaps( Date.fromString, s );
+			else if ( nullable )
+				null;
+			else
+				throw NotNullable( info.fields[context] );
+
 		case TTimestamp:
-			var tstamp = parseData( s, TFloat );
-			try { Date.fromTime( tstamp ); }
-			catch ( e:Dynamic ) { throw GenericTypingError( e, info.fields[context] ); }
+
+			var tstamp:Null<Float> = _parseData( s, TFloat, nullable );
+			if ( tstamp != null )
+				encaps( Date.fromTime, tstamp );
+			else
+				null;
+
 		case THaxeSerial:
-			s = getString( s, true );
-			try { Unserializer.run( s ); }
-			catch ( e:Dynamic ) { throw GenericTypingError( e, info.fields[context] ); }
+
+			s = trim( s );
+			if ( s.length != 0 )
+				encaps( Unserializer.run, s );
+			else if ( nullable )
+				null;
+			else
+				throw NotNullable( info.fields[context] );
+
 		case all:
+
 			throw CannotParse( info.fields[context] );
+
 		};
 	}
 
-	/* 
-	 * Reads a trimmed or not String and checks for nulls.
-	 * If the result would later become null, raises NotNullable( field ).
-	 */
-	function getString( s:String, trimmed:Bool ):String {
-		if ( trimmed )
-			s = trim( s );
-		if ( s.length != 0 )
-			return s;
-		else
-			throw NotNullable( info.fields[context] );
+	@:generic
+	inline function encaps<T>( f:T->Dynamic, s:T ):Dynamic {
+		try {
+			return f( s );
+		}
+		catch ( e:Dynamic ) {
+			throw GenericTypingError( e, info.fields[context] );
+		}
 	}
 
 }
