@@ -110,7 +110,7 @@ class Reader {
 					state = Newline;
 					// if there was a field, add it to the record
 					if ( field != null )
-						record.push( field.getBytes().toString() );
+						record.push( getBufContets( field ) );
 					// a record is ready to be returned
 					break;
 				case NewlineWaitForNL1:
@@ -136,7 +136,7 @@ class Reader {
 					state = Newline;
 					// if there was a field, add it to the record
 					if ( field != null )
-						record.push( field.getBytes().toString() );
+						record.push( getBufContets( field ) );
 					// a record is ready to be returned
 					break;
 				case Quoted:
@@ -157,7 +157,7 @@ class Reader {
 					if ( field == null )
 						field = new BytesBuffer();
 					// save the current field
-					record.push( field.getBytes().toString() );
+					record.push( getBufContets( field ) );
 					// prepare another field, a separator implies that there is
 					// something else to come
 					field = new BytesBuffer();
@@ -218,7 +218,7 @@ class Reader {
 					state = EOF;
 					// acceptable end of file
 					if ( field != null )
-						record.push( field.getBytes().toString() );
+						record.push( getBufContets( field ) );
 					// a record is ready to be returned
 					break;
 				}
@@ -348,6 +348,21 @@ class Reader {
 		else
 			return "#" + char;
 	}
+
+	/* 
+	 * Introduced to avoid problems with the inconsistent behaviour
+	 * for Bytes::toString when Bytes::length == 0.
+	 * Issue: https://github.com/HaxeFoundation/haxe/issues/2076
+	 */
+	inline function getBufContets( b:BytesBuffer ):String {
+		#if neko
+		return b.getBytes().toString();
+		#else
+		var bytes = b.getBytes();
+		return bytes.length > 0 ? bytes.toString() : "";
+		#end
+	}
+
 }
 
 #if (!TESTCSV) private #end typedef Char = Int;

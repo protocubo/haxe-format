@@ -89,6 +89,15 @@ class TestCSVReader extends TestCase {
 			         , read( "'11'':''11':12:'''13$%13'''$%'''':22:23", "$%", ":", "'" ) );
 	}
 
+	public function testEmptyFields() {
+		assertEquals( write( [ [ 1, "", 3 ], [ "", 2, "" ] ] )
+		            , read( "1,,3NL,2,NL", "NL", ",", "'" ) );
+		assertEquals( write( [ [ 1, "", 3 ], [ "", 2, "" ] ] )
+		            , read( "1,,3N,2,N", "N", ",", "'" ) );
+		assertEquals( write( [ [ 1, "", 3 ], [ "", 2, "" ] ] )
+		            , read( "'1',,'3'N,'2',N", "N", ",", "'" ) );
+	}
+
 	public function testErrors() {
 		// the reader should also be set in some sort of invalid state
 		assertTrue( true );
