@@ -1,10 +1,10 @@
 {
-  "name": "elebeta-haxe-format",
+  "name": "elebeta-format",
   "url": "http://jonasmalaco.com/",
   "license": "BSD",
   "tags": [],
-  "description": "A complementary Haxe formats library.",
-  "version": "0.0.0",
+  "description": "Complementary Elebeta format library for Haxe.",
+  "version": "0.0.1",
   "contributors": [ "elebeta" ],
   "dependencies": {
 
