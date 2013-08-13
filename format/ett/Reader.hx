@@ -1,14 +1,14 @@
 package format.ett;
 
 import haxe.io.*;
+import haxe.Unserializer;
+import StringTools.trim;
+import Type.createEmptyInstance;
 
 import format.csv.Reader in CSVReader;
 
 import format.ett.Data;
 import format.ett.Error;
-
-import haxe.Unserializer;
-import StringTools.trim;
 
 class Reader {
 
@@ -21,11 +21,22 @@ class Reader {
 		readFileInfo( _input );
 	}
 
-	public function readRecord():Dynamic {
+	/* 
+	 * Reads the next record in the stream.
+	 * Returns a Dynamic or an instance of [cl].
+	 * Observations:
+	 *  - [cl] must be a class and its fields will be set with the reflection
+	 *    API.
+	 *  - [cl] instance will be created the the Type.createEmptyInstance
+	 *    function. Therefore, its constructor wont be called.
+	 *  - What happens when setting a field not defined in [cl] depends on the
+	 *    behavior of the Reflection class on the selected target.
+	 */
+	public function readRecord( ?cl:Dynamic ):Dynamic {
 		var data = csvReader.readRecord();
 		if ( data.length != info.fields.length )
 			throw GenericError( 'Expected #fields = ${info.fields.length} but was ${data.length}' );
-		var r:Dynamic = cast {};
+		var r:Dynamic = cl != null ? createEmptyInstance( cl ) : cast {};
 		for ( i in 0...info.fields.length ) {
 			context = i;
 			Reflect.setField( r, info.fields[i].name, parseData( data[i], info.fields[i].type ) );
