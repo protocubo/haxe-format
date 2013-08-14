@@ -121,6 +121,7 @@ class TestETTReader extends TestCase {
 		// currently all of these succeed on neko and C++!
 		// trace( "Std.parseInt( 'a 42' ):" + Std.parseInt( "a 42" ) );
 		// trace( "Std.parseInt( '42 a' ):" + Std.parseInt( "42 a" ) );
+		// assertAnyException( r.parseData.bind( "a", TInt ) );
 		// assertAnyException( r.parseData.bind( "a 42", TInt ) );
 		// assertAnyException( r.parseData.bind( "42 a", TInt ) );
 	}
@@ -141,6 +142,7 @@ class TestETTReader extends TestCase {
 		// currently all of these succeed on neko and C++!
 		// trace( "Std.parseFloat( 'a 42.42' ):" + Std.parseFloat( "a 42.42" ) );
 		// trace( "Std.parseFloat( '42.42 a' ):" + Std.parseFloat( "42.42 a" ) );
+		// assertAnyException( r.parseData.bind( "a", TFloat ) );
 		// assertAnyException( r.parseData.bind( "a 42.42", TFloat ) );
 		// assertAnyException( r.parseData.bind( "42.42 a", TFloat ) );
 	}
@@ -157,6 +159,28 @@ class TestETTReader extends TestCase {
 		assertEquals( " 42 ", r.parseData( " 42 ", TNull(TString) ) );
 		assertEquals( "42", r.parseData( " 42 ", TTrim(TString) ) );
 		assertEquals( "42", r.parseData( " 42 ", TNull(TTrim(TString)) ) );
+	}
+
+	public function testParseGeometry() {
+		var r = TypeTools.createEmptyInstance( Reader );
+		r.info = new FileInfo();
+		r.info.fields = [ new Field( "test", TUnknown("test" ) ) ];
+		r.context = 0;
+		r.init();
+
+		// successes
+		assertEqualSerialized( new Point(10.,20.), r.parseData( " 10   20  ", TPoint ) );
+		assertEqualSerialized( new LineString([new Point(10.,20.),new Point(30.,40.)])
+		, r.parseData( " 10   20  , 30  40 ", TLineString ) );
+		assertEqualSerialized( new Point(10.,20.), r.parseData( " 10   20  ", TGeometry(TPoint) ) );
+		assertEqualSerialized( new LineString([new Point(10.,20.),new Point(30.,40.)])
+		, r.parseData( " 10   20  , 30  40 ", TGeometry(TLineString) ) );
+
+		// expected failures
+		assertAnyException( r.parseData.bind( "10", TPoint ) );
+		assertAnyException( r.parseData.bind( "10 20 30", TPoint ) );
+		// fails because of failure on assertAnyException( r.parseData.bind( "a", TFloat ) );
+		// assertAnyException( r.parseData.bind( "10 z", TPoint ) );
 	}
 
 	function getSample( major:Int, minor:Int ):BytesInput {

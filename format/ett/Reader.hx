@@ -16,8 +16,11 @@ class Reader {
 	var csvReader:CSVReader;
 
 	var context:Int;
+	
+	var pointMatcher:EReg;
 
 	public function new( _input:Input ) {
+		init();
 		readFileInfo( _input );
 	}
 
@@ -159,6 +162,11 @@ class Reader {
 			return TTrim( parseType( trimmable.matched( 1 ) ) );
 		}
 
+		var geometry = ~/^Geometry<(.+)>$/;
+		if ( geometry.match( typeDef ) ) {
+			return TGeometry( parseType( geometry.matched( 1 ) ) );
+		}
+
 		return switch ( typeDef ) {
 		case "Bool": TBool;
 		case "Int": TInt;
@@ -167,6 +175,9 @@ class Reader {
 		case "Date": TDate;
 		case "Timestamp": TTimestamp;
 		case "HaxeSerial": THaxeSerial;
+		case "Point": TPoint;
+		case "LineString": TLineString;
+		case "MultiPolygon": TMultiPolygon;
 		case all: TUnknown( all );
 		};
 	}
@@ -181,6 +192,8 @@ class Reader {
 		case TTrim( TString ): t;
 		case TTrim( TNull( _ ) ): throw TrimOfNull( t );
 		case TTrim( _ ): throw InvalidTrim( t );
+		case TGeometry( TPoint ), TGeometry( TLineString ), TGeometry( TMultiPolygon ): t;
+		case TGeometry( _ ): throw InvalidGeometry( t );
 		case TUnknown( ts ): throw UnknownType( ts );
 		case all: t;
 		};
@@ -272,6 +285,31 @@ class Reader {
 			else
 				throw NotNullable( info.fields[context] );
 
+		case TGeometry( g ):
+
+			_parseData( s, g, false );
+
+		case TPoint:
+
+			if ( !pointMatcher.match( s ) )
+				throw GenericTypingError( "Cannot parse geometry:point "+s, info.fields[context] );
+			// trace( [ pointMatcher.matched( 1 ), pointMatcher.matched( 2 ) ] );
+			new Point( _parseData( pointMatcher.matched( 1 ), TFloat, false )
+			         , _parseData( pointMatcher.matched( 2 ), TFloat, false ) );
+
+		case TLineString:
+
+			s = trim( s );
+			var points:Array<Point> = s.split( "," ).map(
+				function ( x:String ):Point
+					return _parseData( x, TPoint, false )
+			);
+			new LineString( points );
+
+		case TMultiPolygon:
+
+			throw CannotParse( info.fields[context] );
+
 		case all:
 
 			throw CannotParse( info.fields[context] );
@@ -287,6 +325,10 @@ class Reader {
 		catch ( e:Dynamic ) {
 			throw GenericTypingError( e, info.fields[context] );
 		}
+	}
+
+	function init() {
+		pointMatcher = ~/^[ \t]*([^ \t]+)[ \t]+([^ \t]+)[ \t]*$/;
 	}
 
 }

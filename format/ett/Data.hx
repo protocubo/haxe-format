@@ -53,6 +53,7 @@ enum Encoding {
 }
 
 enum Type {
+	// base types
 	TNull( of:Type );
 	TBool;
 	TInt;
@@ -62,5 +63,42 @@ enum Type {
 	TTimestamp;
 	THaxeSerial;
 	TTrim( s:Type );
+	
+	// minimal GIS types
+	TGeometry( geomType:Type );
+	TPoint;
+	TLineString;
+	TMultiPolygon;
+
+	// Other
 	TUnknown( typeName:String );
+}
+
+class Point {
+	public var x:Float;
+	public var y:Float;
+	public function new( _x, _y ) {
+		x = _x;
+		y = _y;
+	}
+}
+
+class LineString {
+	public var point:Array<Point>;
+	public function new( _point ) {
+		point = _point;
+	}
+}
+
+class Polygon {
+	public var outer:LineString;
+	public var inner:Array<LineString>;
+	public function new( _outer, _inner ) {
+		outer = _outer;
+		inner = _inner;
+	}
+}
+
+class MultiPolygon {
+	public var polygon:Array<Polygon>;
 }

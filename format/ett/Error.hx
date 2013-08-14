@@ -35,6 +35,7 @@ enum ETTReaderError {
 	NullOfNull( t:Type );
 	TrimOfNull( t:Type );
 	InvalidTrim( t:Type );
+	InvalidGeometry( t:Type );
 	UnknownType( fieldType:String );
 
 	// Data typing errors
