@@ -220,14 +220,19 @@ class Reader {
 			case "":
 				if ( nullable ) null else throw NotNullable( info.fields[context] );
 			case _:
-				throw InvalidBoolean( s, info.fields[context] );
+				throw InvalidBool( s, info.fields[context] );
 			};
 
 		case TInt:
 
 			s = trim( s );
-			if ( s.length != 0 )
+			if ( s.length != 0 ) {
+				#if ETT_UNSAFE
 				encaps( Std.parseInt, s );
+				#else
+				parseInt( s );
+				#end
+			}
 			else if ( nullable )
 				null;
 			else
@@ -237,7 +242,11 @@ class Reader {
 
 			s = trim( s );
 			if ( s.length != 0 )
+				#if ETT_UNSAFE
 				encaps( Std.parseFloat, s );
+				#else
+				parseFloat( s );
+				#end
 			else if ( nullable )
 				null;
 			else
@@ -315,6 +324,67 @@ class Reader {
 			throw CannotParse( info.fields[context] );
 
 		};
+	}
+
+	inline function parseInt( s:String ) {
+		var pos = -1;
+		var c = -1;
+		var digit = false, hex = false;
+		while ( ++pos < s.length ) {
+			c = StringTools.fastCodeAt( s, pos );
+			switch ( c ) {
+			case "-".code, "+".code:
+				if ( pos != 0 )
+					throw InvalidInt( s, info.fields[context] );
+			case "x".code, "X".code:
+				if ( pos - 0 != 1 || StringTools.fastCodeAt( s, pos -1 ) != "0".code )
+					throw InvalidInt( s, info.fields[context] );
+				digit = false;
+				hex = true;
+			case c if ( c >= "0".code && c <= "9".code ):
+				digit = true;
+			case c if ( ( c >= "a".code && c <= "f".code ) || ( c >= "A".code && c <= "F".code ) ):
+				if ( !hex )
+					throw InvalidInt( s, info.fields[context] );
+				digit = true;
+			case all:
+				throw InvalidInt( s, info.fields[context] );
+			}
+		}
+		if ( !digit )
+			throw InvalidInt( s, info.fields[context] );
+		else
+			return Std.parseInt( s );
+	}
+
+	inline function parseFloat( s:String ) {
+		var pos = -1;
+		var c = -1;
+		var digit = false;
+		var le = false;
+		while ( ++pos < s.length ) {
+			c = StringTools.fastCodeAt( s, pos );
+			switch ( c ) {
+			case "-".code, "+".code:
+				if ( pos != 0 && !le )
+					throw InvalidFloat( s, info.fields[context] );
+				le = false;
+			case "e".code, "E".code:
+				if ( !digit )
+					throw InvalidFloat( s, info.fields[context] );
+				le = true;
+			case ".".code:
+				// nothing
+			case c if ( c >= "0".code && c <= "9".code ):
+				digit = true;
+			case all:
+				throw InvalidFloat( s, info.fields[context] );
+			}
+		}
+		if ( !digit )
+			throw InvalidFloat( s, info.fields[context] );
+		else
+			return Std.parseFloat( s );
 	}
 
 	@:generic

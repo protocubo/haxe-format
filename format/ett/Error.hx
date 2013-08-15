@@ -40,7 +40,9 @@ enum ETTReaderError {
 
 	// Data typing errors
 	GenericTypingError( e:Dynamic, field:Field );
-	InvalidBoolean( str:String, field:Field );
+	InvalidBool( str:String, field:Field );
+	InvalidInt( std:String, field:Field );
+	InvalidFloat( std:String, field:Field );
 	NotNullable( field:Field );
 	CannotParse( field:Field );
 

@@ -113,17 +113,24 @@ class TestETTReader extends TestCase {
 		// successes
 		assertEquals( 42, r.parseData( "42", TInt ) );
 		assertEquals( 42, r.parseData( "042", TInt ) );
-		assertEquals( 42, r.parseData( "+042", TInt ) );
 		assertEquals( 42, r.parseData( " 42 ", TInt ) );
+		assertEquals( 42, r.parseData( "+42", TInt ) );
+		assertEquals( 42, r.parseData( "+042", TInt ) );
 		assertEquals( 42, r.parseData( "0x2a", TInt ) );
+		assertEquals( 42, r.parseData( "0x2A", TInt ) );
+		assertEquals( 42, r.parseData( "0X2A", TInt ) );
 
 		// expected failures
-		// currently all of these succeed on neko and C++!
-		// trace( "Std.parseInt( 'a 42' ):" + Std.parseInt( "a 42" ) );
-		// trace( "Std.parseInt( '42 a' ):" + Std.parseInt( "42 a" ) );
-		// assertAnyException( r.parseData.bind( "a", TInt ) );
-		// assertAnyException( r.parseData.bind( "a 42", TInt ) );
-		// assertAnyException( r.parseData.bind( "42 a", TInt ) );
+		// this type checking is disabled with ETT_UNSAFE
+		assertAnyException( r.parseData.bind( "a", TInt ) );
+		assertAnyException( r.parseData.bind( "+", TInt ) );
+		assertAnyException( r.parseData.bind( "0x", TInt ) );
+		assertAnyException( r.parseData.bind( "a 42", TInt ) );
+		assertAnyException( r.parseData.bind( "42 a", TInt ) );
+		assertAnyException( r.parseData.bind( "- 42", TInt ) );
+		assertAnyException( r.parseData.bind( "-+42", TInt ) );
+		assertAnyException( r.parseData.bind( "+0xff", TInt ) );
+		assertAnyException( r.parseData.bind( "+xff", TInt ) );
 	}
 
 	public function testParseFloat() {
@@ -133,18 +140,23 @@ class TestETTReader extends TestCase {
 		r.context = 0;
 
 		// successes
+		assertEquals( 42, r.parseData( "42", TFloat ) );
 		assertEquals( 42.42, r.parseData( "42.42", TFloat ) );
 		assertEquals( 42.42, r.parseData( "042.42", TFloat ) );
-		assertEquals( 42.42, r.parseData( "+042.42", TFloat ) );
 		assertEquals( 42.42, r.parseData( " 42.42 ", TFloat ) );
+		assertEquals( 42.42, r.parseData( "+042.42", TFloat ) );
+		assertEquals( 42.42, r.parseData( "4242e-2", TFloat ) );
+		assertEquals( 42.42, r.parseData( "4242E-2", TFloat ) );
 
 		// expected failures
-		// currently all of these succeed on neko and C++!
-		// trace( "Std.parseFloat( 'a 42.42' ):" + Std.parseFloat( "a 42.42" ) );
-		// trace( "Std.parseFloat( '42.42 a' ):" + Std.parseFloat( "42.42 a" ) );
-		// assertAnyException( r.parseData.bind( "a", TFloat ) );
-		// assertAnyException( r.parseData.bind( "a 42.42", TFloat ) );
-		// assertAnyException( r.parseData.bind( "42.42 a", TFloat ) );
+		// this type checking is disabled with ETT_UNSAFE
+		assertAnyException( r.parseData.bind( "a", TFloat ) );
+		assertAnyException( r.parseData.bind( "e10", TFloat ) );
+		assertAnyException( r.parseData.bind( "a 42.42", TFloat ) );
+		assertAnyException( r.parseData.bind( "42.42 a", TFloat ) );
+		assertAnyException( r.parseData.bind( "- 42.42", TFloat ) );
+		assertAnyException( r.parseData.bind( "-+42.42", TFloat ) );
+		assertAnyException( r.parseData.bind( "4242e+-2", TFloat ) );
 	}
 
 	public function testParseString() {
@@ -179,8 +191,7 @@ class TestETTReader extends TestCase {
 		// expected failures
 		assertAnyException( r.parseData.bind( "10", TPoint ) );
 		assertAnyException( r.parseData.bind( "10 20 30", TPoint ) );
-		// fails because of failure on assertAnyException( r.parseData.bind( "a", TFloat ) );
-		// assertAnyException( r.parseData.bind( "10 z", TPoint ) );
+		assertAnyException( r.parseData.bind( "10 z", TPoint ) );
 	}
 
 	function getSample( major:Int, minor:Int ):BytesInput {

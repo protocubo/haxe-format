@@ -160,7 +160,7 @@ class TestCSVReaderUtf8 extends TestCSVReader {
 }
 
 class MeasureCSVReader extends TestCase {
-
+#if MEASURE_CSV
 	function input( utf8 ) {
 		var s = new StringBuf();
 		for ( x in 0...10000 )
@@ -183,15 +183,15 @@ class MeasureCSVReader extends TestCase {
 		return 5e-5*( t1 - t0 );
 	}
 
-
 	public function testAscii() {
 		trace( "\nMeasureCSVReader ASCII: "+measure( false ) );
 		assertTrue( true );
 	}
 
+
 	public function testUtf8() {
 		trace( "\nMeasureCSVReader UTF-8: "+measure( true ) );
 		assertTrue( true );
 	}
-
+#end
 }
