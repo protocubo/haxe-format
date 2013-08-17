@@ -320,11 +320,10 @@ class ETTReader {
 		case TLineString:
 
 			s = trim( s );
-			var points:Array<Point> = s.split( "," ).map(
-				function ( x:String ):Point
-					return _parseData( x, TPoint, false )
-			);
-			new LineString( points );
+			var shape = new LineString();
+			for ( sp in s.split( "," ) )
+				shape.push( _parseData( sp, TPoint, false ) );
+			shape;
 
 		// case TMultiPolygon:
 
