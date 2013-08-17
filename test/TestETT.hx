@@ -5,11 +5,11 @@ import haxe.Timer;
 
 import format.ett.Data;
 import format.ett.Error;
+import format.ett.Geometry;
 import format.ett.Reader;
+import format.ett.Writer;
 
-import Type in TypeTools;
-
-@:access( format.ett.Reader )
+@:access( format.ett.ETTReader )
 class TestETTReader extends TestCase {
 
 	public function testSamples() {
@@ -20,9 +20,9 @@ class TestETTReader extends TestCase {
 	}
 
 	public function testHeaderTypeParsing() {
-		var r = TypeTools.createEmptyInstance( Reader );
-		r.info = new FileInfo();
-		r.info.fields = [ new Field( "test", TUnknown("test" ) ) ];
+		var r = std.Type.createEmptyInstance( Reader );
+		r.info = new FileInfo( "\n", UTF8, ",", "\"", ""
+		, [ new Field( "test", TUnknown("test" ) ) ] );
 		r.context = 0;
 
 		assertEqualSerialized( TString, r.parseType( "String" ) );
@@ -37,9 +37,9 @@ class TestETTReader extends TestCase {
 	}
 
 	public function testNotNullableValues() {
-		var r = TypeTools.createEmptyInstance( Reader );
-		r.info = new FileInfo();
-		r.info.fields = [ new Field( "test", TUnknown("test" ) ) ];
+		var r = std.Type.createEmptyInstance( Reader );
+		r.info = new FileInfo( "\n", UTF8, ",", "\"", ""
+		, [ new Field( "test", TUnknown("test" ) ) ] );
 		r.context = 0;
 
 		// successes
@@ -64,9 +64,9 @@ class TestETTReader extends TestCase {
 	}
 
 	public function testNullableValues() {
-		var r = TypeTools.createEmptyInstance( Reader );
-		r.info = new FileInfo();
-		r.info.fields = [ new Field( "test", TUnknown("test" ) ) ];
+		var r = std.Type.createEmptyInstance( Reader );
+		r.info = new FileInfo( "\n", UTF8, ",", "\"", ""
+		, [ new Field( "test", TUnknown("test" ) ) ] );
 		r.context = 0;
 
 		assertEquals( null, r.parseData( "", TNull(TBool) ) );
@@ -88,9 +88,9 @@ class TestETTReader extends TestCase {
 	}
 
 	public function testParseBool() {
-		var r = TypeTools.createEmptyInstance( Reader );
-		r.info = new FileInfo();
-		r.info.fields = [ new Field( "test", TUnknown("test" ) ) ];
+		var r = std.Type.createEmptyInstance( Reader );
+		r.info = new FileInfo( "\n", UTF8, ",", "\"", ""
+		, [ new Field( "test", TUnknown("test" ) ) ] );
 		r.context = 0;
 
 		// successes
@@ -105,9 +105,9 @@ class TestETTReader extends TestCase {
 	}
 
 	public function testParseInt() {
-		var r = TypeTools.createEmptyInstance( Reader );
-		r.info = new FileInfo();
-		r.info.fields = [ new Field( "test", TUnknown("test" ) ) ];
+		var r = std.Type.createEmptyInstance( Reader );
+		r.info = new FileInfo( "\n", UTF8, ",", "\"", ""
+		, [ new Field( "test", TUnknown("test" ) ) ] );
 		r.context = 0;
 
 		// successes
@@ -134,9 +134,9 @@ class TestETTReader extends TestCase {
 	}
 
 	public function testParseFloat() {
-		var r = TypeTools.createEmptyInstance( Reader );
-		r.info = new FileInfo();
-		r.info.fields = [ new Field( "test", TUnknown("test" ) ) ];
+		var r = std.Type.createEmptyInstance( Reader );
+		r.info = new FileInfo( "\n", UTF8, ",", "\"", ""
+		, [ new Field( "test", TUnknown("test" ) ) ] );
 		r.context = 0;
 
 		// successes
@@ -160,9 +160,9 @@ class TestETTReader extends TestCase {
 	}
 
 	public function testParseString() {
-		var r = TypeTools.createEmptyInstance( Reader );
-		r.info = new FileInfo();
-		r.info.fields = [ new Field( "test", TUnknown("test" ) ) ];
+		var r = std.Type.createEmptyInstance( Reader );
+		r.info = new FileInfo( "\n", UTF8, ",", "\"", ""
+		, [ new Field( "test", TUnknown("test" ) ) ] );
 		r.context = 0;
 
 		assertEquals( "42", r.parseData( "42", TString ) );
@@ -174,9 +174,9 @@ class TestETTReader extends TestCase {
 	}
 
 	public function testParseGeometry() {
-		var r = TypeTools.createEmptyInstance( Reader );
-		r.info = new FileInfo();
-		r.info.fields = [ new Field( "test", TUnknown("test" ) ) ];
+		var r = std.Type.createEmptyInstance( Reader );
+		r.info = new FileInfo( "\n", UTF8, ",", "\"", ""
+		, [ new Field( "test", TUnknown("test" ) ) ] );
 		r.context = 0;
 		r.init();
 
@@ -211,6 +211,31 @@ class TestETTReader extends TestCase {
 		}
 		catch ( e:Eof ) { }
 		return data;
+	}
+
+}
+
+@:access( format.ett.ETTWriter )
+class TestETTWriter extends TestCase {
+
+	public function testWriteData() {
+		var w = std.Type.createEmptyInstance( Writer );
+		var d = { b:false, i:1, f:1.1, fi:1, s:"s"
+		        , d:Date.fromString( "2013-08-15" )
+		        , t:Date.fromString( "2013-08-15" ).getTime()
+		        , hs:[1,null,0] };
+		assertEquals( "false", w.writeData( d, "b", TBool ) );
+		assertEquals( "1", w.writeData( d, "i", TInt ) );
+		assertEquals( "1.1", w.writeData( d, "f", TFloat ) );
+		assertEquals( "1", w.writeData( d, "fi", TFloat ) );
+		assertEquals( "s", w.writeData( d, "s", TString ) );
+		assertEquals( "2013-08-15 00:00:00", w.writeData( d, "d", TDate ) );
+		assertEquals( Std.string( d.t ), w.writeData( d, "t", TTimestamp ) );
+		assertEquals( "ai1nzh", w.writeData( d, "hs", THaxeSerial ) );
+	}
+
+	public function testWrite() {
+		
 	}
 
 }

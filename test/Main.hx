@@ -13,6 +13,7 @@ class Main {
 		 , new TestCSV.TestCSVReaderUtf8()
 		 , new TestCSV.MeasureCSVReader()
 		 , new TestETT.TestETTReader()
+		 , new TestETT.TestETTWriter()
 		];
 		for ( t in tests )
 			runner.add( t );

@@ -10,6 +10,13 @@ class TestHaxe extends TestCase {
 		assertEquals( "", bb.getBytes().toString() );
 	}
 
+	public function testEmptyBytes2() {
+		var b = haxe.io.Bytes.alloc( 0 );
+		assertEquals( "", b.readString( 0, 0 ) ); // fails for C++
+		var bb = new haxe.io.BytesBuffer();
+		assertEquals( "", bb.getBytes().readString( 0, 0 ) );
+	}
+
 	public function testCharSequence() {
 		// 0...9
 		assertEquals( "1".code, "0".code+1 );

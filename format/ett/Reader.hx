@@ -9,8 +9,11 @@ import format.csv.Reader in CSVReader;
 
 import format.ett.Data;
 import format.ett.Error;
+import format.ett.Geometry;
 
-class Reader {
+typedef Reader = ETTReader;
+
+class ETTReader {
 
 	public var info:FileInfo;
 	var csvReader:CSVReader;
@@ -47,8 +50,13 @@ class Reader {
 		return r;
 	}
 
+	public function close() {
+		csvReader.close();
+	}
+
 	function readFileInfo( input:Input ):Void {
-		info = new FileInfo();
+		var tinfo = std.Type.createEmptyInstance( FileInfo );
+		tinfo.fields = [];
 
 		var b:Null<Bytes> = null;
 
@@ -59,49 +67,49 @@ class Reader {
 		b = readUntil( input, "CODING-", NoCodingTag );
 		if ( b.length == 0 )
 			throw NoNewlineData;
-		info.newline = b.toString();
-		// trace( info );
+		tinfo.newline = b.toString();
+		// trace( tinfo );
 
-		b = readUntil( input, info.newline, GenericError( "Missing newline sequence after CODING-<COD>" ) );
+		b = readUntil( input, tinfo.newline, GenericError( "Missing newline sequence after CODING-<COD>" ) );
 		if ( b.length == 0 )
 			throw NoCodingData;
 		switch ( b.toString() ) {
-		case "ISO": info.encoding = ISO;
-		case "UTF-8": info.encoding = UTF8;
+		case "ISO": tinfo.encoding = ISO;
+		case "UTF-8": tinfo.encoding = UTF8;
 		case all: throw BadCoding( all );
 		}
-		// trace( info );
+		// trace( tinfo );
 
 		b = readUntil( input, "SEPARATOR-", NoSeparatorTag );
 		if ( b.length != 0 )
 			throw GenericError ( "Extra bytes between CODING-<COD><NEWLINE> and SEPARATOR-" );
-		b = readUntil( input, info.newline, GenericError( "Missing newline sequence after SEPARATOR-<SEP>" ) );
+		b = readUntil( input, tinfo.newline, GenericError( "Missing newline sequence after SEPARATOR-<SEP>" ) );
 		if ( b.length == 0 )
 			throw NoSeparatorData;
-		info.separator = b.toString();
-		// trace( info );
+		tinfo.separator = b.toString();
+		// trace( tinfo );
 
 		b = readUntil( input, "ESCAPE-", NoEscapeTag );
 		if ( b.length != 0 )
 			throw GenericError ( "Extra bytes between SEPARATOR-<SEP><NEWLINE> and ESCAPE-" );
-		b = readUntil( input, info.newline, GenericError( "Missing newline sequence after ESCAPE-<SEP>" ) );
+		b = readUntil( input, tinfo.newline, GenericError( "Missing newline sequence after ESCAPE-<SEP>" ) );
 		if ( b.length == 0 )
 			throw NoEscapeData;
-		info.escape = b.toString();
-		// trace( info );
+		tinfo.escape = b.toString();
+		// trace( tinfo );
 
 		b = readUntil( input, "CLASS-", NoClassTag );
 		if ( b.length != 0 )
 			throw GenericError ( "Extra bytes between ESCAPE-<QTE><NEWLINE> and CLASS-" );
-		b = readUntil( input, info.newline, GenericError( "Missing newline sequence after CLASS-<NAME>" ) );
-		info.className = b.toString();
-		// trace( info );
+		b = readUntil( input, tinfo.newline, GenericError( "Missing newline sequence after CLASS-<NAME>" ) );
+		tinfo.className = b.toString();
+		// trace( tinfo );
 
-		var utf8 = switch ( info.encoding ) {
+		var utf8 = switch ( tinfo.encoding ) {
 		case UTF8: true;
 		case all: false;
 		};
-		csvReader = new CSVReader( input, info.newline, info.separator, info.escape, utf8 );
+		csvReader = new CSVReader( input, tinfo.newline, tinfo.separator, tinfo.escape, utf8 );
 
 		var types = csvReader.readRecord().map( trim );
 		var columns = csvReader.readRecord().map( trim );
@@ -115,9 +123,12 @@ class Reader {
 			if ( types[i].length == 0 )
 				throw EmptyColumnType( i+1 );
 			var type = validateType( parseType( types[i] ) );
-			info.fields.push( new Field( columns[i], type ) );
-			// trace( info );
+			tinfo.fields.push( new Field( columns[i], type ) );
+			// trace( tinfo );
 		}
+
+		info = new FileInfo( tinfo.newline, tinfo.encoding, tinfo.separator
+		, tinfo.escape, tinfo.className, tinfo.fields );
 	}
 
 	function readUntil( input:Input, k:String, exception:ETTReaderError ):Bytes {
@@ -177,7 +188,7 @@ class Reader {
 		case "HaxeSerial": THaxeSerial;
 		case "Point": TPoint;
 		case "LineString": TLineString;
-		case "MultiPolygon": TMultiPolygon;
+		// case "MultiPolygon": TMultiPolygon;
 		case all: TUnknown( all );
 		};
 	}
@@ -192,7 +203,7 @@ class Reader {
 		case TTrim( TString ): t;
 		case TTrim( TNull( _ ) ): throw TrimOfNull( t );
 		case TTrim( _ ): throw InvalidTrim( t );
-		case TGeometry( TPoint ), TGeometry( TLineString ), TGeometry( TMultiPolygon ): t;
+		case TGeometry( TPoint ), TGeometry( TLineString )/*, TGeometry( TMultiPolygon )*/: t;
 		case TGeometry( _ ): throw InvalidGeometry( t );
 		case TUnknown( ts ): throw UnknownType( ts );
 		case all: t;
@@ -315,9 +326,9 @@ class Reader {
 			);
 			new LineString( points );
 
-		case TMultiPolygon:
+		// case TMultiPolygon:
 
-			throw CannotParse( info.fields[context] );
+		// 	throw CannotParse( info.fields[context] );
 
 		case all:
 

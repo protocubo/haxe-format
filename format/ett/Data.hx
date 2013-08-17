@@ -11,13 +11,13 @@ class FileInfo {
 	public var className:String; // CLASS-<NAME>
 	public var fields:Array<Field>;
 
-	public function new() {
-		newline = "\n";
-		encoding = ISO;
-		separator = ",";
-		escape = "\"";
-		className = "";
-		fields = [];
+	public function new( _newline, _encoding, _separator, _escape, _className, _fields ) {
+		newline = _newline;
+		encoding = _encoding;
+		separator = _separator;
+		escape = _escape;
+		className = _className;
+		fields = _fields.map( function ( f ) return f.copy() );
 	}
 
 	public function toString() {
@@ -27,6 +27,11 @@ class FileInfo {
 		+ "Escape: "+escape+"\n"
 		+ "Class name: "+className+"\n"
 		+ "Fields:\n\t"+fields.join( "\n\t" )+"\n";
+	}
+
+	public function copy() {
+		return new FileInfo( newline, encoding, separator, escape, className
+		, fields.map( function ( f ) return f.copy() ) );
 	}
 
 }
@@ -43,6 +48,10 @@ class Field {
 
 	public function toString() {
 		return "'"+name+"' : "+type;
+	}
+
+	public function copy() {
+		return new Field( name, type );
 	}
 
 }
@@ -68,37 +77,8 @@ enum Type {
 	TGeometry( geomType:Type );
 	TPoint;
 	TLineString;
-	TMultiPolygon;
+	// TMultiPolygon;
 
 	// Other
 	TUnknown( typeName:String );
-}
-
-class Point {
-	public var x:Float;
-	public var y:Float;
-	public function new( _x, _y ) {
-		x = _x;
-		y = _y;
-	}
-}
-
-class LineString {
-	public var point:Array<Point>;
-	public function new( _point ) {
-		point = _point;
-	}
-}
-
-class Polygon {
-	public var outer:LineString;
-	public var inner:Array<LineString>;
-	public function new( _outer, _inner ) {
-		outer = _outer;
-		inner = _inner;
-	}
-}
-
-class MultiPolygon {
-	public var polygon:Array<Polygon>;
 }

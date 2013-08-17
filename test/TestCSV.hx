@@ -1,13 +1,15 @@
 package ;
 
-import haxe.io.Eof;
-import haxe.io.StringInput;
+import haxe.io.*;
 import haxe.Timer;
 
 import format.csv.Error;
 import format.csv.Reader;
+import format.csv.ReaderHelpers;
+import format.csv.Tools;
+import format.csv.Writer;
 
-@:access( format.csv.Reader )
+@:access( format.csv.CSVReader )
 class TestCSVReader extends TestCase {
 
 	function reader( i, nl, sep, qte ) {

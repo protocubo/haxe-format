@@ -1,9 +1,19 @@
 package format.csv;
 
-import haxe.io.*;
-import format.csv.Error;
+import haxe.io.Bytes;
+import haxe.io.BytesBuffer;
+import haxe.io.BytesInput;
+import haxe.io.Eof;
+import haxe.io.Input;
 
-class Reader {
+import format.csv.Error;
+import format.csv.ReaderHelpers;
+import format.csv.Tools.*;
+import format.csv.Tools;
+
+typedef Reader = CSVReader;
+
+class CSVReader {
 
 	var utf8:Bool;
 	var typeTable:CharTypeTable;
@@ -19,7 +29,7 @@ class Reader {
 		
 		state = StartFile;
 
-		var nl = readAllChars( new BytesInput( Bytes.ofString( newline ) ) );
+		var nl = readAllChars( new BytesInput( Bytes.ofString( newline ) ), utf8 );
 		switch ( nl.length ) {
 		case 1:
 			typeTable.set( nl[0], NL0_noNL1 );
@@ -32,7 +42,7 @@ class Reader {
 			throw "Invalid number of chars in newline sequence: "+all;
 		}
 
-		var sep = readAllChars( new BytesInput( Bytes.ofString( separator ) ) );
+		var sep = readAllChars( new BytesInput( Bytes.ofString( separator ) ), utf8 );
 		switch ( sep.length ) {
 		case 1:
 			typeTable.set( sep[0], SEP );
@@ -40,7 +50,7 @@ class Reader {
 			throw "Invalid number of chars in separator: "+all;
 		}
 
-		var qte = readAllChars( new BytesInput( Bytes.ofString( quote ) ) );
+		var qte = readAllChars( new BytesInput( Bytes.ofString( quote ) ), utf8 );
 		switch ( qte.length ) {
 		case 1:
 			typeTable.set( qte[0], QTE );
@@ -51,8 +61,10 @@ class Reader {
 	}
 
 	public function close():Void {
-		input.close();
-		input = null;
+		if ( input != null ) {
+			input.close();
+			input = null;
+		}
 	}
 
 	public function readRecord():Array<String> {
@@ -74,7 +86,7 @@ class Reader {
 
 			pre = cur;
 			try {
-				cur = readChar( input );
+				cur = readChar( input, utf8 );
 				curType = typeTable.get( cur );
 			}
 			catch ( eof:Eof ) {
@@ -110,7 +122,7 @@ class Reader {
 					state = Newline;
 					// if there was a field, add it to the record
 					if ( field != null )
-						record.push( getBufContets( field ) );
+						record.push( getBufContents( field ) );
 					// a record is ready to be returned
 					break;
 				case NewlineWaitForNL1:
@@ -136,14 +148,14 @@ class Reader {
 					state = Newline;
 					// if there was a field, add it to the record
 					if ( field != null )
-						record.push( getBufContets( field ) );
+						record.push( getBufContents( field ) );
 					// a record is ready to be returned
 					break;
 				case Quoted:
 					// state = Quoted;
 					addChar( field, cur ); // field prepared uppon entry to the Quoted state
 				case QuotedPostQuote:
-					throw 'Invalid char \'${printChar( cur )}\' after QTE in quoted field';
+					throw 'Invalid char \'${printChar( cur, utf8 )}\' after QTE in quoted field';
 				case EOF:
 					throw "Cannot reach this point";
 				}
@@ -157,7 +169,7 @@ class Reader {
 					if ( field == null )
 						field = new BytesBuffer();
 					// save the current field
-					record.push( getBufContets( field ) );
+					record.push( getBufContents( field ) );
 					// prepare another field, a separator implies that there is
 					// something else to come
 					field = new BytesBuffer();
@@ -218,7 +230,7 @@ class Reader {
 					state = EOF;
 					// acceptable end of file
 					if ( field != null )
-						record.push( getBufContets( field ) );
+						record.push( getBufContents( field ) );
 					// a record is ready to be returned
 					break;
 				}
@@ -246,7 +258,7 @@ class Reader {
 					// add char to the current field
 					addChar( field, cur ); // field prepared uppon entry to the Quoted state
 				case QuotedPostQuote:
-					throw 'Invalid char \'${printChar( cur )}\' after QTE in quoted field';
+					throw 'Invalid char \'${printChar( cur, utf8 )}\' after QTE in quoted field';
 				case EOF:
 					throw "Cannot reach this point";
 				}
@@ -258,171 +270,4 @@ class Reader {
 		return record;
 	}
 
-	function readChar( i:Input ):Char {
-		if ( utf8 ) {
-
-			var char:Int = -1;
-			try {
-				char = readUtf8Start( i );
-			}
-			catch ( e:CSVUtf8Error ) { // format.csv.Error.CSVUtf8Error
-				return 0xfffd; // �
-			}
-
-			if ( char & 0x80 == 0 ) // single byte char
-				return char;
-			else
-
-			try {
-
-				if ( char & 0xe0 == 0xc0 ) // 2 byte char
-					return char
-					       << 8 | readUtf8Continuation( i );
-				else if ( char & 0xf0 == 0xe0 ) // 3 byte char
-					return ( char << 8 | readUtf8Continuation( i ) )
-					       << 8 | readUtf8Continuation( i );
-				else if ( char & 0xf8 == 0xf0 ) // 4 byte char
-					return ( ( char << 8 | readUtf8Continuation( i ) )
-					         << 8 | readUtf8Continuation( i ) )
-					       << 8 | readUtf8Continuation( i );
-				else
-					throw BadStartByte( char );
-
-			}
-			catch ( e:CSVUtf8Error ) { // format.csv.Error.CSVUtf8Error
-				return 0xfffd; // �
-			}
-			catch ( e:Eof ) {
-				return 0xfffd; // �
-			}
-
-		}
-		else
-			return i.readByte();
-	}
-
-	function readUtf8Start( i:Input ):Int {
-		var b = i.readByte();
-		// trace( [ b, b&0xc0, 0x80 ] );
-		if ( b & 0xc0 == 0x80 ) // continuation byte
-			throw BadStartByte( b );
-		return b;
-	}
-
-	function readUtf8Continuation( i:Input ):Int {
-		var b = i.readByte();
-		// trace( [ b, b&0x80, 0x80 ] );
-		if ( b & 0x80 != 0x80 ) // 10xx xxxx
-			throw BadContinuationByte( b );
-		return b;
-	}
-
-	function readAllChars( i:Input ):Array<Char> {
-		var y = [];
-		try {
-			while ( true )
-				y.push( readChar( i ) );
-		}
-		catch ( eof:Eof ) { }
-		return y;
-	}
-
-	function addChar( buf:BytesBuffer, c:Char ) {
-		if ( c & 0xff000000 != 0 )
-			buf.addByte( c >> 24 & 0xff );
-		if ( c & 0xff0000 != 0 )
-			buf.addByte( c >> 16 & 0xff );
-		if ( c & 0xff00 != 0 )
-			buf.addByte( c >> 8 & 0xff );
-		buf.addByte( c & 0xff );
-	}
-
-	function printChar( char:Char ):String {
-		if ( char >= 0x20 && char <= 0x7e )
-			return String.fromCharCode( char );
-		else if ( utf8 && char > 255 ) {
-			var b = new BytesBuffer();
-			addChar( b, char );
-			return b.getBytes().toString();
-		}
-		else
-			return "#" + char;
-	}
-
-	/* 
-	 * Introduced to avoid problems with the inconsistent behaviour
-	 * for Bytes::toString when Bytes::length == 0.
-	 * Issue: https://github.com/HaxeFoundation/haxe/issues/2076
-	 */
-	inline function getBufContets( b:BytesBuffer ):String {
-		#if neko
-		return b.getBytes().toString();
-		#else
-		var bytes = b.getBytes();
-		return bytes.length > 0 ? bytes.toString() : "";
-		#end
-	}
-
-}
-
-#if (!TESTCSV) private #end typedef Char = Int;
-
-#if (!TESTCSV) private #end class CharTypeTable {
-	
-	var charType:Array<CharTypeKeyVal>;
-
-	public function new() {
-		charType = [];
-	}
-
-	public function get( char:Char ):CharType {
-		for ( x in charType )
-			if ( char == x.char )	
-				return x.type;
-		return OTHER;
-	}
-
-	public function set( char:Char, type:CharType ):Void {
-		switch ( get( char ) ) {
-		case OTHER:
-			charType.push( new CharTypeKeyVal( char, type ) );
-		case all:
-			throw 'Char type $type already registred';
-		}
-	}
-
-}
-
-#if (!TESTCSV) private #end class CharTypeKeyVal {
-
-	public var char( default, null ):Char;
-	public var type( default, null ):CharType;
-
-	public function new( _char:Char, _type:CharType ) {
-		char = _char;
-		type = _type;
-	}
-
-}
-
-#if (!TESTCSV) private #end enum CharType {
-	NL0; // only if the newline sequence is NL0NL1
-	NL1;
-	NL0_noNL1;
-	SEP;
-	QTE;
-	OTHER;
-	EOF; // -1
-	// NULL;
-}
-
-#if (!TESTCSV) private #end enum ReaderState {
-	StartFile;
-	NewlineWaitForNL1;
-	Newline;
-	Separator;
-	Unquoted;
-	Quoted;
-	QuotedPostQuote;
-	EOF;
 }
