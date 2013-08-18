@@ -178,7 +178,6 @@ class TestETTReader extends TestCase {
 		r.info = new FileInfo( "\n", UTF8, ",", "\"", ""
 		, [ new Field( "test", TUnknown("test" ) ) ] );
 		r.context = 0;
-		r.init();
 
 		// successes
 		assertEqualSerialized( new Point(10.,20.), r.parseData( " 10   20  ", TPoint ) );

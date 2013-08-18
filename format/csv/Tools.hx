@@ -90,9 +90,8 @@ class Tools {
 	}
 
 	public static inline function getBufContents( b:BytesBuffer, ?pos=0, ?len=-1 ):String {
-		var bytes = b.getBytes();
-		if ( len == -1 ) len = bytes.length - pos;
-		return len > 0 ? bytes.readString( pos, len ) : "";
+		if ( len == -1 ) len = b.length - pos;
+		return len > 0 ? b.getBytes().readString( pos, len ) : "";
 	}
 
 

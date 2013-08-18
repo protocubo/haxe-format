@@ -19,11 +19,8 @@ class ETTReader {
 	var csvReader:CSVReader;
 
 	var context:Int;
-	
-	var pointMatcher:EReg;
 
 	public function new( _input:Input ) {
-		init();
 		readFileInfo( _input );
 	}
 
@@ -311,20 +308,29 @@ class ETTReader {
 
 		case TPoint:
 
-			if ( !pointMatcher.match( s ) )
-				throw GenericTypingError( "Cannot parse geometry:point "+s, info.fields[context] );
-			// trace( [ pointMatcher.matched( 1 ), pointMatcher.matched( 2 ) ] );
-			new Point( _parseData( pointMatcher.matched( 1 ), TFloat, false )
-			         , _parseData( pointMatcher.matched( 2 ), TFloat, false ) );
+			s = trim( s );
+			var split = s.split( " " );
+			var data = [];
+			for ( part in split ) {
+				if ( part.length > 0 )
+					data.push( _parseData( part, TFloat, false ) );
+			}
+			if ( data.length != 2 )
+				throw GenericTypingError( "Cannot parse TGeometry(TPoint) "+s, info.fields[context] );
+			new Point( data[0], data[1] );
 
 		case TLineString:
 
 			s = trim( s );
-			var points:Array<Point> = s.split( "," ).map(
-				function ( x:String ):Point
-					return _parseData( x, TPoint, false )
-			);
-			new LineString( points );
+			var split = s.split( "," );
+			var data = [];
+			for ( part in split ) {
+				if ( part.length > 0 )
+					data.push( _parseData( part, TPoint, false ) );
+			}
+			if ( data.length < 2 )
+				throw GenericTypingError( "Cannot parse TGeometry(TLineString) "+s, info.fields[context] );
+			new LineString( data );
 
 		// case TMultiPolygon:
 
@@ -406,10 +412,6 @@ class ETTReader {
 		catch ( e:Dynamic ) {
 			throw GenericTypingError( e, info.fields[context] );
 		}
-	}
-
-	function init() {
-		pointMatcher = ~/^[ \t]*([^ \t]+)[ \t]+([^ \t]+)[ \t]*$/;
 	}
 
 }

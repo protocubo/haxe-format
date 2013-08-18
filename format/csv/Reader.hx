@@ -67,7 +67,7 @@ class CSVReader {
 		}
 	}
 
-	public function readRecord():Array<String> {
+	public function readRecord( ?reuse:Array<String> ):Array<String> {
 
 		if ( input == null )
 			throw "No input stream (probably it has already been closed)";
@@ -77,7 +77,8 @@ class CSVReader {
 		case all: // nothing to do
 		}
 
-		var record:Array<String> = [];
+		var record:Array<String> = reuse != null ? reuse : [];
+		var recLen = 0;
 		var field:BytesBuffer = null;
 		var cur:Char = 0;
 		var pre:Char = 0;
@@ -122,7 +123,7 @@ class CSVReader {
 					state = Newline;
 					// if there was a field, add it to the record
 					if ( field != null )
-						record.push( getBufContents( field ) );
+						record[recLen++] = getBufContents( field );
 					// a record is ready to be returned
 					break;
 				case NewlineWaitForNL1:
@@ -148,7 +149,7 @@ class CSVReader {
 					state = Newline;
 					// if there was a field, add it to the record
 					if ( field != null )
-						record.push( getBufContents( field ) );
+						record[recLen++] = getBufContents( field );
 					// a record is ready to be returned
 					break;
 				case Quoted:
@@ -169,7 +170,7 @@ class CSVReader {
 					if ( field == null )
 						field = new BytesBuffer();
 					// save the current field
-					record.push( getBufContents( field ) );
+					record[recLen++] = getBufContents( field );
 					// prepare another field, a separator implies that there is
 					// something else to come
 					field = new BytesBuffer();
@@ -230,7 +231,7 @@ class CSVReader {
 					state = EOF;
 					// acceptable end of file
 					if ( field != null )
-						record.push( getBufContents( field ) );
+						record[recLen++] = getBufContents( field );
 					// a record is ready to be returned
 					break;
 				}
@@ -266,8 +267,10 @@ class CSVReader {
 			}
 
 		}
-
-		return record;
+		if ( recLen < record.length )
+			return record.slice( 0, recLen );
+		else
+			return record;
 	}
 
 }

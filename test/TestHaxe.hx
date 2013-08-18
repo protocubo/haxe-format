@@ -42,4 +42,10 @@ class TestHaxe extends TestCase {
 		assertEquals( "F".code, "E".code+1 );
 	}
 
+	public function testArrayPushReturn() {
+		var x = [];
+		for ( i in 0...1000 )
+			assertEquals( i+1, x.push( i ) ); // this is NOT the spec
+	}
+
 }
