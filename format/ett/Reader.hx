@@ -36,7 +36,7 @@ class ETTReader {
 	 *    behavior of the Reflection class on the selected target.
 	 */
 	public function readRecord( ?cl:Dynamic ):Dynamic {
-		var data = csvReader.readRecord();
+		data = csvReader.readRecord( data );
 		if ( data.length != info.fields.length )
 			throw GenericError( 'Expected #fields = ${info.fields.length} but was ${data.length}' );
 		var r:Dynamic = cl != null ? createEmptyInstance( cl ) : cast {};
@@ -46,6 +46,7 @@ class ETTReader {
 		}
 		return r;
 	}
+	var data:Array<String>;
 
 	public function close() {
 		csvReader.close();
