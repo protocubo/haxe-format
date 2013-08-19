@@ -19,11 +19,8 @@ class ETTReader {
 	var csvReader:CSVReader;
 
 	var context:Int;
-	
-	var pointMatcher:EReg;
 
 	public function new( _input:Input ) {
-		init();
 		readFileInfo( _input );
 	}
 
@@ -39,7 +36,7 @@ class ETTReader {
 	 *    behavior of the Reflection class on the selected target.
 	 */
 	public function readRecord( ?cl:Dynamic ):Dynamic {
-		var data = csvReader.readRecord();
+		data = csvReader.readRecord( data );
 		if ( data.length != info.fields.length )
 			throw GenericError( 'Expected #fields = ${info.fields.length} but was ${data.length}' );
 		var r:Dynamic = cl != null ? createEmptyInstance( cl ) : cast {};
@@ -49,6 +46,7 @@ class ETTReader {
 		}
 		return r;
 	}
+	var data:Array<String>;
 
 	public function close() {
 		csvReader.close();
@@ -311,18 +309,28 @@ class ETTReader {
 
 		case TPoint:
 
-			if ( !pointMatcher.match( s ) )
-				throw GenericTypingError( "Cannot parse geometry:point "+s, info.fields[context] );
-			// trace( [ pointMatcher.matched( 1 ), pointMatcher.matched( 2 ) ] );
-			new Point( _parseData( pointMatcher.matched( 1 ), TFloat, false )
-			         , _parseData( pointMatcher.matched( 2 ), TFloat, false ) );
-
+			s = trim( s );
+			var split = s.split( " " );
+			var data = [];
+			for ( part in split ) {
+				if ( part.length > 0 )
+					data.push( _parseData( part, TFloat, false ) );
+			}
+			if ( data.length != 2 )
+				throw GenericTypingError( "Cannot parse TGeometry(TPoint) "+s, info.fields[context] );
+			new Point( data[0], data[1] );
+			
 		case TLineString:
 
 			s = trim( s );
+			var split = s.split( "," );
 			var shape = new LineString();
-			for ( sp in s.split( "," ) )
-				shape.push( _parseData( sp, TPoint, false ) );
+			for ( part in split ) {
+				if ( part.length > 0 )
+					shape.push( _parseData( part, TPoint, false ) );
+			}
+			if ( shape.length < 2 )
+				throw GenericTypingError( "Cannot parse TGeometry(TLineString) "+s, info.fields[context] );
 			shape;
 
 		// case TMultiPolygon:
@@ -405,10 +413,6 @@ class ETTReader {
 		catch ( e:Dynamic ) {
 			throw GenericTypingError( e, info.fields[context] );
 		}
-	}
-
-	function init() {
-		pointMatcher = ~/^[ \t]*([^ \t]+)[ \t]+([^ \t]+)[ \t]*$/;
 	}
 
 }
