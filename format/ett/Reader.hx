@@ -35,18 +35,34 @@ class ETTReader {
 	 *  - What happens when setting a field not defined in [cl] depends on the
 	 *    behavior of the Reflection class on the selected target.
 	 */
-	public function readRecord( ?cl:Dynamic ):Dynamic {
+	public function readRecord():Dynamic {
 		data = csvReader.readRecord( data );
 		if ( data.length != info.fields.length )
 			throw GenericError( 'Expected #fields = ${info.fields.length} but was ${data.length}' );
-		var r:Dynamic = cl != null ? createEmptyInstance( cl ) : cast {};
+		var object:Dynamic = cast {};
 		for ( i in 0...info.fields.length ) {
 			context = i;
-			Reflect.setField( r, info.fields[i].name, parseData( data[i], info.fields[i].type ) );
+			Reflect.setField( object, info.fields[i].name, parseData( data[i], info.fields[i].type ) );
 		}
-		return r;
+		return object;
 	}
-	var data:Array<String>;
+
+	/* 
+	 * Fast version of readRecord, that only changes the received [object]
+	 */
+	@:generic
+	public function fastReadRecord<T>( object:T ):T {
+		data = csvReader.readRecord( data );
+		if ( data.length != info.fields.length )
+			throw GenericError( 'Expected #fields = ${info.fields.length} but was ${data.length}' );
+		for ( i in 0...info.fields.length ) {
+			context = i;
+			Reflect.setField( object, info.fields[i].name, parseData( data[i], info.fields[i].type ) );
+		}
+		return object;
+	}
+
+	private var data:Array<String>; // data array used for faster CSV parsing
 
 	public function close() {
 		csvReader.close();
