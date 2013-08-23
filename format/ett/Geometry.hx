@@ -31,7 +31,7 @@ abstract LineString( Array<Float> ) {
 			this = [];
 	}
 	@:arrayAccess @:noCompletion public inline function arrayGet( i:Int ):Point {
-		return cast this.slice( i*2, i*2+1 );
+		return cast this.slice( i*2, i*2+2 );
 	}
 	@:arrayAccess @:noCompletion public inline function arraySet( i:Int, v:Point ):Point {
 		this[i*2] = v.x;
