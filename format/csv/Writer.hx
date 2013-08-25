@@ -34,8 +34,8 @@ class CSVWriter {
 		}
 	}
 
-	private inline function escape( s:String ) {
-		escaper.escape( s );
+	private inline function escape( s:String ):String {
+		return escaper.escape( s );
 	}
 
 }

@@ -233,7 +233,8 @@ class CSVReader {
 					if ( field != null )
 						record[recLen++] = getBufContents( field );
 					// a record is ready to be returned
-					break;
+					throw new Eof();
+					// break;
 				}
 
 			case OTHER:
