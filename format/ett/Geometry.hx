@@ -12,7 +12,6 @@ abstract Point( Array<Float> ) {
 	public inline function geoJSONString():String {
 		return '{"type":"Point","coordinates":[$x,$y]}';
 	}
-	public inline function isPoint():Bool return true;
 	@:from @:noCompletion public inline static function fromArray( a:Array<Float> ):Point {
 		if ( a.length != 2 )
 			throw "Cannot cast Array<Float> to Point: Array has length != 2 ("+a.length+")";

@@ -119,7 +119,7 @@ class ETTWriter {
 		case TNull( t ):
 			writeData( d, fname, t, true );
 		case TBool:
-			var fdata = Reflect.field( d, fname );
+			var fdata:Dynamic = Reflect.field( d, fname );
 			if ( fdata != null )
 				if ( Std.is( fdata, Bool ) )
 					Std.string( fdata );
@@ -130,7 +130,7 @@ class ETTWriter {
 			else
 				"";
 		case TInt:
-			var fdata = Reflect.field( d, fname );
+			var fdata:Dynamic = Reflect.field( d, fname );
 			if ( fdata != null )
 				if ( Std.is( fdata, Int ) )
 					Std.string( fdata );
@@ -141,7 +141,7 @@ class ETTWriter {
 			else
 				"";
 		case TFloat:
-			var fdata = Reflect.field( d, fname );
+			var fdata:Dynamic = Reflect.field( d, fname );
 			if ( fdata != null )
 				if ( Std.is( fdata, Float ) )
 					Std.string( fdata );
@@ -152,7 +152,7 @@ class ETTWriter {
 			else
 				"";
 		case TString:
-			var fdata = Reflect.field( d, fname );
+			var fdata:Dynamic = Reflect.field( d, fname );
 			if ( fdata != null )
 				if ( Std.is( fdata, String ) )
 					fdata;
@@ -163,7 +163,7 @@ class ETTWriter {
 			else
 				"";
 		case TDate:
-			var fdata = Reflect.field( d, fname );
+			var fdata:Dynamic = Reflect.field( d, fname );
 			if ( fdata != null )
 				if ( Std.is( fdata, Date ) )
 					Std.string( fdata );
@@ -174,7 +174,7 @@ class ETTWriter {
 			else
 				"";
 		case TTimestamp:
-			var fdata:Dynamic = Reflect.hasField( d, fname ) ? Reflect.field( d, fname ) : null;
+			var fdata:Dynamic = Reflect.field( d, fname );
 			if ( fdata != null ) {
 				if ( Std.is( fdata, Date ) )
 					Std.string( fdata.getTime() );
@@ -188,7 +188,7 @@ class ETTWriter {
 			else
 				"";
 		case THaxeSerial:
-			var fdata = Reflect.field( d, fname );
+			var fdata:Dynamic = Reflect.field( d, fname );
 			if ( fdata != null )
 				haxe.Serializer.run( fdata );
 			else if ( !nullable )
@@ -198,7 +198,7 @@ class ETTWriter {
 		case TTrim( TString ):
 			writeData( d, fname, TString, nullable );
 		case TGeometry( TPoint ):
-			var fdata = Reflect.field( d, fname );
+			var fdata:Dynamic = Reflect.field( d, fname );
 			if ( fdata != null )
 				if ( Std.is( fdata, Point ) )
 					fdata.rawString();
@@ -209,7 +209,7 @@ class ETTWriter {
 			else
 				"";
 		case TGeometry( TLineString ):
-			var fdata = Reflect.field( d, fname );
+			var fdata:Dynamic = Reflect.field( d, fname );
 			if ( fdata != null )
 				if ( Std.is( fdata, LineString ) )
 					fdata.rawString();
