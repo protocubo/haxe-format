@@ -233,8 +233,8 @@ class TestETTWriter extends TestCase {
 		assertEquals( "ai1nzh", w.writeData( d, "hs", THaxeSerial ) );
 	}
 
-	public function testWrite() {
+	// public function testWrite() {
 		
-	}
+	// }
 
 }

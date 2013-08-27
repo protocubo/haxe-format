@@ -100,9 +100,23 @@ class TestCSVReader extends TestCase {
 		            , read( "'1',,'3'N,'2',N", "N", ",", "'" ) );
 	}
 
-	public function testErrors() {
-		// the reader should also be set in some sort of invalid state
-		assertTrue( true );
+	// public function testErrors() {
+	// 	// the reader should also be set in some sort of invalid state
+	// 	assertTrue( true );
+	// }
+
+	public function testEofBug() {
+		// somewhere this resulted in a infinite loop
+		var line = "a few 'random words' just for fun";
+		var lineInp = new StringInput( line );
+		var rdr = reader( lineInp, "\n", " ", "'" );
+		var rs = [];
+		try {
+			while ( true ) rdr.readRecord( rs );
+		}
+		catch ( e:Eof ) { /*trace( e );*/ }
+		assertEqualArrays( ["a", "few", "random words", "just", "for", "fun"]
+		                 , rs );
 	}
 
 	function input( s:String ):StringInput {
