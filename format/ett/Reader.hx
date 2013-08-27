@@ -335,19 +335,19 @@ class ETTReader {
 			if ( data.length != 2 )
 				throw GenericTypingError( "Cannot parse TGeometry(TPoint) "+s, info.fields[context] );
 			new Point( data[0], data[1] );
-
+			
 		case TLineString:
 
 			s = trim( s );
 			var split = s.split( "," );
-			var data = [];
+			var shape = new LineString();
 			for ( part in split ) {
 				if ( part.length > 0 )
-					data.push( _parseData( part, TPoint, false ) );
+					shape.push( _parseData( part, TPoint, false ) );
 			}
-			if ( data.length < 2 )
+			if ( shape.length < 2 )
 				throw GenericTypingError( "Cannot parse TGeometry(TLineString) "+s, info.fields[context] );
-			new LineString( data );
+			shape;
 
 		// case TMultiPolygon:
 

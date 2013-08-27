@@ -3,21 +3,23 @@ package format.ett;
 class Point {
 	public var x:Float;
 	public var y:Float;
-	public function new( _x, _y ) {
+	public inline function new( _x, _y ) {
 		x = _x;
 		y = _y;
 	}
-	public function rawString():String {
+	public inline function rawString():String {
 		return x+" "+y;
 	}
-	public function geoJSONString():String {
+	public inline function geoJSONString():String {
 		return '{"type":"Point","coordinates":[$x,$y]}';
 	}
 }
 
 class LineString {
-	public var point:Array<Point>;
-	public function new( _point ) {
+	private var point:Array<Point>;
+	public var length(get,never):Int;
+	public inline function new( ?_point ) {
+		if ( _point == null ) _point = [];
 		point = _point;
 	}
 	public inline function rawString():String {
@@ -46,17 +48,6 @@ class LineString {
 		b.add( ']}' );
 		return b.toString();
 	}
+	public inline function push( p:Point ):Int return point.push( p );
+	private function get_length() return point.length;
 }
-
-// class Polygon {
-// 	public var outer:LineString;
-// 	public var inner:Array<LineString>;
-// 	public function new( _outer, _inner ) {
-// 		outer = _outer;
-// 		inner = _inner;
-// 	}
-// }
-
-// class MultiPolygon {
-// 	public var polygon:Array<Polygon>;
-// }
