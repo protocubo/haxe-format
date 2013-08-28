@@ -106,17 +106,7 @@ class TestCSVReader extends TestCase {
 	// }
 
 	public function testEofBug() {
-		// somewhere this resulted in a infinite loop
-		var line = "a few 'random words' just for fun";
-		var lineInp = new StringInput( line );
-		var rdr = reader( lineInp, "\n", " ", "'" );
-		var rs = [];
-		try {
-			while ( true ) rdr.readRecord( rs );
-		}
-		catch ( e:Eof ) { /*trace( e );*/ }
-		assertEqualArrays( ["a", "few", "random words", "just", "for", "fun"]
-		                 , rs );
+		assertAnyException( reader( new StringInput( "" ), "\n", " ", "'" ).readRecord.bind(null) );
 	}
 
 	function input( s:String ):StringInput {

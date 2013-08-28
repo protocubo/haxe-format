@@ -268,6 +268,8 @@ class CSVReader {
 			}
 
 		}
+		if ( recLen == 0 && state == EOF )
+			throw new Eof();
 		if ( recLen < record.length )
 			return record.slice( 0, recLen );
 		else
