@@ -1,6 +1,6 @@
 -neko exp/unit_tests/neko/unit_tests.n
 -main Main
 -cp test
--D dump
+#-D dump
 -D TESTCSV
 res/ett/add.hxml
