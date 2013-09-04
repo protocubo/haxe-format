@@ -106,7 +106,7 @@ support.
 SI<[meters],[kilograms],[seconds]>
 ```
 
-####2.1.3.4 Other types, that may be added soon:
+####2.1.3.4 Other types that may be added soon:
 
 ```
 Base16
