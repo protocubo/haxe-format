@@ -27,7 +27,9 @@ are defined.
 The newline sequence used throughout the file will appear
 after the NEWLINE keyword.
 
+```
 NEWLINE-<newline sequence>
+```
 
 On the rest of this document the selected newline sequence
 will be called by {nl}.
@@ -37,23 +39,33 @@ will be called by {nl}.
 The encoding used on the file: either UTF-8 or ISO (with
 local code page).
 
+```
 CODING-<UTF-8 or ISO>{nl}
+```
 
 ####2.1.1.3 Separator configuration
 
+```
 SEPARATOR-<separator character>{nl}
+```
 
 ####2.1.1.4 Escape configuration
 
+```
 ESCAPE-<escape character>{nl}
+```
 
 ###2.1.2 Optionally blank schema name
 
+```
 CLASS-<optionally blank schema name>{nl}
+```
 
 ###2.1.2 Column types
 
+```
 <1st column type>{sp}<2nd column>{sp}>...<nth column>{nl}
+```
 
 Type definitions are always trimmed for whitespace.
 
@@ -61,6 +73,7 @@ The types are:
 
 ####2.1.3.1 Basic types (CANNOT BE NULL):
 
+```
 Bool           a true or false enumeration
 Int            a 32-bit integer
 Float          a 64-bit floating point number
@@ -68,16 +81,19 @@ String         locally enconded text
 Date           local date
 Timestamp      utc timestamp from unix epoch in miliseconds
 HaxeSerial     haxe serialized data
+```
 
 ####2.1.3.2 Nullables:
 
 Any type may be wrapped by Null<> and interpreted as
 nullable.
 
+```
 Null<Bool>
 Null<Int>
 ...
 Null<HaxeSerial>
+```
 
 ####2.1.3.3 Geometry:
 
@@ -86,20 +102,26 @@ Two Geometry types have been implemented: Point and LineString.
 ####2.1.3.4 In the not so near future, there may be some advanced unit
 support.
 
+```
 SI<[meters],[kilograms],[seconds]>
+```
 
 ####2.1.3.4 Other types, that may be added soon:
 
+```
 Base16
 Base64
+```
 
 ###2.1.3 Column names
 
+```
 <1st column name>{sp}<2nd column>{sp}>...<nth column>{nl}
+```
 
 Column names are always trimmed for whitespace.
 
-ATTENTION: column names must be unique.
+**ATTENTION**: column names must be unique.
 
 ##2.2 Data
 
@@ -120,8 +142,10 @@ For trimmed fields, an empty trimmed string will also result in null.
 
 ##3.3 Boolean encoding
 
+```
 true
 false
+```
 
 Always trimmed for whitespace.
 
@@ -129,21 +153,25 @@ Always trimmed for whitespace.
 
 For now, any Haxe supported integer text encoding:
 
+```
 128
 0x80
+```
 
 Always trimmed for whitespace.
 
-ATTENTION: all integer should fit in the standard Haxe 32-bit integer.
+**ATTENTION**: all integer should fit in the standard Haxe 32-bit integer.
 
 ##3.5 Floating point number encoding
 
 For now, any Haxe supported integer text encoding:
 
+```
 1.1
 1.
 .1
 11e-1
+```
 
 Always trimmed for whitespace.
 
@@ -158,7 +186,7 @@ May be wrapped by Trim<> for whitespace trimming.
 For date encoding, follow the standard Date.hx rules.
 
 For timestamp encoding, this should be any floating point UTC timestamp,
-with _mili_seconds since Unix epoch.
+with **miliseconds** since Unix epoch.
 
 Always trimmed for whitespace.
 
