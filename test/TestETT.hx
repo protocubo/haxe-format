@@ -194,11 +194,17 @@ class TestETTReader extends TestCase {
 	}
 
 	function getSample( major:Int, minor:Int ):BytesInput {
-		return new BytesInput( haxe.Resource.getBytes( 'res/ett/sample${major}_${minor}' ) );
+		var data = haxe.Resource.getBytes( 'res.ett.sample${major}_${minor}' );
+		// trace( data.toString().substr( 0, 40 ) );
+		// trace( new BytesInput( data ).readAll().toString() );
+		return new BytesInput( data );
 	}
 
 	function getData( major:Int, minor:Int ):Array<Dynamic> {
-		return haxe.Unserializer.run( haxe.Resource.getString( 'res/ett/data${major}_${minor}' ) );
+		var data = haxe.Resource.getString( 'res.ett.data${major}_${minor}' );
+		// trace( data.substr( 0, 40 ) );
+		// trace( haxe.Unserializer.run( data ) );
+		return haxe.Unserializer.run( data );
 	}
 
 	function read( input:Input ):Array<Dynamic> {
