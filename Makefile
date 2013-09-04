@@ -31,3 +31,14 @@ java:
 	haxe ${HXFLAGS} unit_tests.java.hxml
 	java -jar exp/unit_tests/java/java.jar
 .PHONY: java
+
+package:
+	rm -f elebeta-format.zip
+	zip -r elebeta-format.zip . -x exp/\* .git/\* .hxsublime_tmp/\* gitstats/\* \
+	\*.gitignore
+.PHONY: package
+
+install: package
+	haxelib local elebeta-format.zip
+.PHONY: install
+
