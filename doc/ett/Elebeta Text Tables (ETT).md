@@ -216,12 +216,12 @@ NEWLINE-
 CODING-ISO
 SEPARATOR-|
 ESCAPE-"
-CLASS-elebeta.ett.rodoTollSim.Node
-Int|     Float|     Float
- id|         x|         y
-  1|-40.298736|-20.310141
-  2|-40.291990|-20.302984
-  3|-40.311600|-20.310500
+CLASS-example.Node
+Int|      Geometry<Point>
+ id|          coordinates
+  1|-40.298736 -20.310141
+  2|-40.291990 -20.302984
+  3|-40.311600 -20.310500
 ```
 
 Alternative (bare bones) RodoTollSim Node File (schema Elebeta:RodoTollSim:Node)
@@ -231,12 +231,12 @@ NEWLINE-
 CODING-ISO
 SEPARATOR-|
 ESCAPE-"
-CLASS-elebeta.ett.rodoTollSim.Node
-Int|Float|Float
-id |x|y
-1|-40.298736|-20.310141
-2|-40.291990|-20.302984
-3|-40.311600|-20.310500
+CLASS-example.Node
+Int|Geometry<Point>
+id|coordinates
+1|-40.298736 -20.310141
+2|-40.291990 -20.302984
+3|-40.311600 -20.310500
 ```
 
 RodoTollSim Link File (schema Elebeta:RodoTollSim:Link) making heavy use of
@@ -247,7 +247,7 @@ NEWLINE-
 CODING-ISO
 SEPARATOR-|
 ESCAPE-"
-CLASS-elebeta.ett.rodoTollSim.Link
+CLASS-example.Link
 Int|        Int|         Int|   Float|   Int|Float
  id|startNodeId|finishNodeId|distance|typeId| toll
   1|          1|           2|      69|    50|    0
@@ -263,7 +263,7 @@ NEWLINE-
 CODING-ISO
 SEPARATOR-|
 ESCAPE-"
-CLASS-elebeta.ett.rodoTollSim.Link
+CLASS-example.Link
 Int|Int|Int|Float|Int|Float
 id|startNodeId|finishNodeId|distance|typeId|toll
 1|1|2|69|50|0
