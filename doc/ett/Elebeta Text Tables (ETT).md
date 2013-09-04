@@ -5,7 +5,8 @@ Elebeta Text Tables (ETT)
 --------------------------------------------------------------------------------
 
 This format is based of CSV (Comma-Separated Values), in its purest form:
-it stores data in a SOMETHING-Separated Values format.
+it stores data in a SOMETHING-Separated Values format. ETT also keeps the same
+escaping rules as CSV, but again with arbitrary escape characters.
 
 For more information on CSV, check [RFC 4180](http://tools.ietf.org/html/rfc4180):
 Common Format and MIME Type for Comma-Separated Values (CSV) Files.
@@ -14,8 +15,8 @@ Common Format and MIME Type for Comma-Separated Values (CSV) Files.
 --------------------------------------------------------------------------------
 
 The format has essencially two sections: a header section and a data section.
-While the data section is totally in CSV format, the first part of the header
-is not (although it is still CSV readable), and that is where all CSV settings
+While the data section is simply in CSV, the first part of the header is not
+(although it is still CSV readable), and there is where all CSV settings
 are defined.
 
 ##2.1 Header
@@ -24,20 +25,18 @@ are defined.
 
 ####2.1.1.1 Newline configuration (LF, CR+LF or other)
 
-The newline sequence used throughout the file will appear
-after the NEWLINE keyword.
+The newline sequence used throughout the file will appear after the NEWLINE
+keyword.
 
 ```
 NEWLINE-<newline sequence>
 ```
 
-On the rest of this document the selected newline sequence
-will be called by {nl}.
+On the rest of this document the selected newline sequence will be called {nl}.
 
 ####2.1.1.2 Encoding
 
-The encoding used on the file: either UTF-8 or ISO (with
-local code page).
+The encoding used on the file: either UTF-8 or ISO (local code page).
 
 ```
 CODING-<UTF-8 or ISO>{nl}
@@ -48,6 +47,8 @@ CODING-<UTF-8 or ISO>{nl}
 ```
 SEPARATOR-<separator character>{nl}
 ```
+
+On the rest of this document the selected separator character will be called {sp}.
 
 ####2.1.1.4 Escape configuration
 
@@ -71,7 +72,7 @@ Type definitions are always trimmed for whitespace.
 
 The types are:
 
-####2.1.3.1 Basic types (CANNOT BE NULL):
+####2.1.3.1 Basic types:
 
 ```
 Bool           a true or false enumeration
@@ -83,10 +84,11 @@ Timestamp      utc timestamp from unix epoch in miliseconds
 HaxeSerial     haxe serialized data
 ```
 
+By themselves these are not nullable.
+
 ####2.1.3.2 Nullables:
 
-Any type may be wrapped by Null<> and interpreted as
-nullable.
+Any type may be wrapped by Null<> for it to be interpreted as nullable.
 
 ```
 Null<Bool>
@@ -97,20 +99,17 @@ Null<HaxeSerial>
 
 ####2.1.3.3 Geometry:
 
-Two Geometry types have been implemented: Point and LineString.
-
-####2.1.3.4 In the not so near future, there may be some advanced unit
-support.
-
 ```
-SI<[meters],[kilograms],[seconds]>
+Geometry<Point>        a point (something with x,y coordinates)
+Geometry<LineString>   a linestring (a sequence of points)
 ```
 
-####2.1.3.4 Other types that may be added soon:
+####2.1.3.4 Other types that may be added in the future:
 
 ```
 Base16
 Base64
+SI<[meters],[kilograms],[seconds]>
 ```
 
 ###2.1.3 Column names
@@ -132,7 +131,7 @@ Table records in CSV format
 
 ##3.1 Escaping
 
-Default RFC 4180 escaping rules.
+Default RFC 4180 escaping rules apply.
 
 ##3.2 Null encoding
 
@@ -186,24 +185,38 @@ May be wrapped by Trim<> for whitespace trimming.
 For date encoding, follow the standard Date.hx rules.
 
 For timestamp encoding, this should be any floating point UTC timestamp,
-with **miliseconds** since Unix epoch.
+with **milliseconds** since Unix epoch.
 
 Always trimmed for whitespace.
 
 ##3.8 Haxe serialization format
 
-Follow the Haxe Serialization Format docs. Object and string caches are not
-well specified there, so one should make sure that everything is readable
-and writtable by the standard Haxe classes/tools.
+Follows the [Haxe Serialization Format](http://haxe.org/manual/serialization/format).
 
 Always trimmed for whitespace.
 
-##3.9 End of file
+##3.9 Geometry
+
+Both Point and LineString consist on the internal representation of the WKT (well
+known text) for these types of geospacial objects. Coordinates are assumed to be
+in the WGS 84 reference coordinate system and in decimal degrees.
+
+###3.9.1 Point
+
+```
+<x coodinate> <y coordinate>
+```
+
+###3.9.2 LineString
+
+```
+<point 0>, <point 1>, ..., <point n>
+```
+
+##3.10 End of file
 
 Properlly formated files should end with a newline. However, readers should
 be able to parse files without the ending newline.
-
-
 
 4 Examples
 --------------------------------------------------------------------------------
