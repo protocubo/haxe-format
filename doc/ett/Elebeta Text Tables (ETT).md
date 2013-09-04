@@ -208,7 +208,7 @@ be able to parse files without the ending newline.
 4 Examples
 --------------------------------------------------------------------------------
 
-##4.1 RodoTollSim Node File (schema Elebeta:RodoTollSim:Node), making heavy use
+RodoTollSim Node File (schema Elebeta:RodoTollSim:Node), making heavy use
  of the auto trimming of non String fields.
 
 ```
@@ -224,7 +224,7 @@ Int|     Float|     Float
   3|-40.311600|-20.310500
 ```
 
-##4.2 Alternative (bare bones) RodoTollSim Node File (schema Elebeta:RodoTollSim:Node)
+Alternative (bare bones) RodoTollSim Node File (schema Elebeta:RodoTollSim:Node)
 
 ```
 NEWLINE-
@@ -239,7 +239,7 @@ id |x|y
 3|-40.311600|-20.310500
 ```
 
-##4.3 RodoTollSim Link File (schema Elebeta:RodoTollSim:Link) making heavy use of
+RodoTollSim Link File (schema Elebeta:RodoTollSim:Link) making heavy use of
  the auto trimming of non String fields.
 
 ```
@@ -256,7 +256,7 @@ Int|        Int|         Int|   Float|   Int|Float
   4|          3|           2|     158|    80|    0
 ```
 
-##4.4 Alternative (bare bones) RodoTollSim Link File (schema Elebeta:RodoTollSim:Link)
+Alternative (bare bones) RodoTollSim Link File (schema Elebeta:RodoTollSim:Link)
 
 ```
 NEWLINE-
