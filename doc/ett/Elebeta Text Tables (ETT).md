@@ -5,13 +5,13 @@ Elebeta Text Tables (ETT)
 1. Introduction
 --------------------------------------------------------------------------------
 
-ETT is based of Comma-Separated Values (CSV, [RFC 4180](http://tools.ietf.org/html/rfc4180)): it stores data in a SOMETHING-Separated Values format and it also  keeps the same escaping rules as CSV. However, it allows for arbitrary newline sequences, separator characters and escaping characters.
+ETT extends Comma-Separated Values (CSV, [RFC 4180](http://tools.ietf.org/html/rfc4180)): data is stored in ~~comma~~_something_-separated values and also follows the same escaping rules from RFC 4180. However, ETT allows for arbitrary newline sequences, separator characters and escaping characters, that are specified in the file itself. Additionally ETT supports schema references and enforces column naming and column typing.
 
 
 2. Structure
 --------------------------------------------------------------------------------
 
-ETT has essencially two sections: a header section and a data section, both CSV compatible. The first part of the header, where all CSV parsings settings are defined, is not actually in CSV, but should still be readble by most programs.
+ETT has essentially two sections: a header section and a data section, both CSV compatible. The first part of the header, where all CSV parsings settings are defined, is not actually in CSV, but should still be readable by most programs.
 
 ##2.1 Header
 
@@ -58,12 +58,12 @@ The types are:
 	Bool           a true or false enumeration
 	Int            a 32-bit integer
 	Float          a 64-bit floating point number
-	String         locally enconded text
+	String         locally encoded text
 	Date           local date
-	Timestamp      utc timestamp from unix epoch in miliseconds
-	HaxeSerial     haxe serialized data
+	Timestamp      milliseconds from Unix epoch in milliseconds
+	HaxeSerial     Haxe serialized data
 
-By themselves these are not nullable.
+None of these are, by themselves, nullable.
 
 ####2.1.3.2 Nullables:
 
@@ -76,8 +76,8 @@ Any type may be wrapped by Null<> for it to be interpreted as nullable.
 
 ####2.1.3.3 Geometry:
 
-	Geometry<Point>        a point (something with x,y coordinates)
-	Geometry<LineString>   a linestring (a sequence of points)
+	Geometry<Point>        a point (an object with x,y coordinates)
+	Geometry<LineString>   a sequence of points
 
 ####2.1.3.4 Other types that may be added in the future:
 
@@ -172,7 +172,7 @@ Both Point and LineString consist on the internal representation of the WKT (wel
 
 ##3.10 End of file
 
-Properlly formated files should end with a newline. However, readers should be able to parse files without the ending newline.
+Properly formated files should end with a newline. However, readers should be able to parse files without the ending newline.
 
 
 4 Examples
