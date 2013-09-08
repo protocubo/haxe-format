@@ -5,7 +5,7 @@ Elebeta Text Tables (ETT)
 1. Introduction
 --------------------------------------------------------------------------------
 
-ETT extends Comma-Separated Values (CSV, [RFC 4180](http://tools.ietf.org/html/rfc4180)): data is stored in ~~comma~~_something_-separated values and also follows the same escaping rules from RFC 4180. However, ETT allows for arbitrary newline sequences, separator characters and escaping characters, that are specified in the file itself. Additionally ETT supports schema references and enforces column naming and column typing.
+ETT extends Comma-Separated Values (CSV, [RFC 4180](http://tools.ietf.org/html/rfc4180)): data is stored in ~~comma-seperated~~ something-separated values and also follows the same escaping rules from RFC 4180. However, ETT allows for arbitrary newline sequences, separator characters and escaping characters, that are specified in the file itself. Additionally ETT supports schema references and enforces column naming and column typing.
 
 
 2. Structure
