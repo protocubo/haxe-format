@@ -1,47 +1,64 @@
-Elebeta Text Tables (ETT)
+#Elebeta Text Tables (ETT)
 ================================================================================
 
 
-1. Introduction
+#1. Introduction
 --------------------------------------------------------------------------------
 
 ETT extends Comma-Separated Values (CSV, [RFC 4180](http://tools.ietf.org/html/rfc4180)): data is stored in ~~comma-seperated~~ something-separated values and also follows the same escaping rules from RFC 4180. However, ETT allows for arbitrary newline sequences, separator characters and escaping characters, that are specified in the file itself. Additionally ETT supports schema references and enforces column naming and column typing.
 
 
-2. Structure
+#2. Structure
 --------------------------------------------------------------------------------
 
-ETT has essentially two sections: a header section and a data section, both CSV compatible. The first part of the header, where all CSV parsings settings are defined, is not actually in CSV, but should still be readable by most programs.
+An ETT file has two sections: a header section and a data section, both of them CSV compatible. The first part of the header (where all CSV parsing settings for the rest of the document are defined) is not actually in CSV, but should still be readable by most programs.
 
 ##2.1 Header
 
-###2.1.1 CSV metadata
+The header is composed of CSV parsing settings, a schema reference and column definitions (column types and column names).
+
+###2.1.1 CSV parsing settings
+
+All CSV parsing settings follow the format
+
+	<keyword>-<value><newline sequence>
+
+where value is a non-quoted (or escaped) string.
 
 ####2.1.1.1 Newline configuration (LF, CR+LF or other)
 
-The newline sequence used throughout the file will appear after the NEWLINE keyword.
+The newline sequence used throughout the file will appear after the NEWLINE- keyword; it can be any 1 or 2 length sequence of Unicode characters, however common LF or CR+LF sequence are recommended on most cases.
 
 	NEWLINE-<newline sequence>
 
-On the rest of this document the selected newline sequence will be called {nl}.
+_From now on, the selected newline sequence will be referred to as {nl}._
 
 ####2.1.1.2 Encoding
 
 The encoding used on the file: either UTF-8 or ISO (local code page).
 
-	CODING-<UTF-8 or ISO>{nl}
+	CODING-UTF-8{nl}
+	CODING-ISO{nl}
 
 ####2.1.1.3 Separator configuration
 
-	SEPARATOR-<separator character>{nl}
+The value separator used in the document; it can be any Unicode character.
 
-On the rest of this document the selected separator character will be called {sp}.
+	SEPARATOR-<separator>{nl}
+
+_From now on, the selected separator will be referred to as {sp}._
 
 ####2.1.1.4 Escape configuration
 
+The character used to escape itself, separators and newline sequences in values; it can be any Unicode character.
+
 	ESCAPE-<escape character>{nl}
 
+_From now on, the selected escape character will be referred to as {esc}._
+
 ###2.1.2 Optionally blank schema name
+
+ETT supports embedding a reference to a schema, so that applications can more easily identify, validate and process these files automatically. A common usage for this it to have it set as the fully qualified Haxe class name used for the records.
 
 	CLASS-<optionally blank schema name>{nl}
 
@@ -85,6 +102,7 @@ Any type may be wrapped by Null<> for it to be interpreted as nullable.
 	Base64
 	SI<[meters],[kilograms],[seconds]>
 
+
 ###2.1.3 Column names
 
 	<1st column name>{sp}<2nd column>{sp}>...<nth column>{nl}
@@ -92,6 +110,7 @@ Any type may be wrapped by Null<> for it to be interpreted as nullable.
 Column names are always trimmed for whitespace.
 
 **ATTENTION**: column names must be unique.
+
 
 ##2.2 Data
 
