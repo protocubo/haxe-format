@@ -183,7 +183,7 @@ Both Point and LineString consist on the internal representation of the WKT (wel
 
 ###3.9.1 Point
 
-	<x coodinate> <y coordinate>
+	<x coordinate> <y coordinate>
 
 ###3.9.2 LineString
 
