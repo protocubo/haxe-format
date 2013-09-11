@@ -93,7 +93,7 @@ class CSVReader {
 			catch ( eof:Eof ) {
 				curType = EOF;
 			}
-			// trace( [ printChar( cur ), curType, state ] );
+			// trace( [ utf8, cur, printChar( cur, utf8 ), curType, state ] );
 			
 			switch ( curType ) {
 			case NL0:
@@ -123,7 +123,7 @@ class CSVReader {
 					state = Newline;
 					// if there was a field, add it to the record
 					if ( field != null )
-						record[recLen++] = getBufContents( field );
+						record[recLen++] = getBufContents( field, utf8 );
 					// a record is ready to be returned
 					break;
 				case NewlineWaitForNL1:
@@ -149,7 +149,7 @@ class CSVReader {
 					state = Newline;
 					// if there was a field, add it to the record
 					if ( field != null )
-						record[recLen++] = getBufContents( field );
+						record[recLen++] = getBufContents( field, utf8 );
 					// a record is ready to be returned
 					break;
 				case Quoted:
@@ -170,7 +170,7 @@ class CSVReader {
 					if ( field == null )
 						field = new BytesBuffer();
 					// save the current field
-					record[recLen++] = getBufContents( field );
+					record[recLen++] = getBufContents( field, utf8 );
 					// prepare another field, a separator implies that there is
 					// something else to come
 					field = new BytesBuffer();
@@ -231,7 +231,7 @@ class CSVReader {
 					state = EOF;
 					// acceptable end of file
 					if ( field != null )
-						record[recLen++] = getBufContents( field );
+						record[recLen++] = getBufContents( field, utf8 );
 					// a record is ready to be returned
 					// throw new Eof(); // cannot throw before returning the record
 					break;

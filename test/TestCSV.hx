@@ -131,10 +131,27 @@ class TestCSVReader extends TestCase {
 
 }
 
+class TestCSVReaderAsciiExt extends TestCSVReader {
+
+	private function ch( char:Int ):String {
+		return String.fromCharCode( char );
+	}
+
+	public function testAsciiExt() {
+		assertEquals( write( [ [11,ch(0xed),13], [21,22,23] ] )
+			         , read( "11:"+ch(0xed)+":13$21:22:23$", "$", ":", "'" ) );
+	}
+
+}
+
 class TestCSVReaderUtf8 extends TestCSVReader {
 
 	override function reader( i, nl, sep, qte ) {
 		return new Reader( i, nl, sep, qte, true );
+	}
+
+	private function ch( char:Int ):String {
+		return String.fromCharCode( char );
 	}
 
 	public function testUtf8Crit() {
@@ -161,6 +178,11 @@ class TestCSVReaderUtf8 extends TestCSVReader {
 	public function test4ByteUtf8() {
 		assertEquals( write( [ ["1𐅄1","1𐅄2","1𐅄3" ], ["2𐅄1","2𐅄2","2𐅄3"] ] )
 			         , read( "1𐅄1:1𐅄2:1𐅄3<>2𐅄1:2𐅄2:2𐅄3", "<>", ":", "'" ) );
+	}
+
+	public function testReplacement() {
+		assertEquals( 0xefbfbd, Tools.readChar( new StringInput( ch(0xed) ), true ) );
+		assertEquals( write( [ ["�"] ] ), read( ch(0xed), "N", "|", "'" ) );
 	}
 
 }
@@ -200,4 +222,46 @@ class MeasureCSVReader extends TestCase {
 		assertTrue( true );
 	}
 #end
+}
+
+class TestTools extends TestCase {
+
+	public static inline function getBufContents( b:BytesBuffer, ?pos=0, ?len=-1 ):String {
+		if ( len == -1 ) len = b.length - pos;
+		return len > 0 ? b.getBytes().readString( pos, len ) : "";
+	}
+
+	public function testGetBufContents() {
+		var bb = function ( bs:Array<Int> ) { var bb = new BytesBuffer(); for ( b in bs ) bb.addByte( b ); return bb; };
+		assertEquals( "ed", Bytes.ofString( getBufContents(bb([0xed])) ).toHex() );
+	}
+
+}
+
+class TestEscaperAsciiExt extends TestCase {
+
+	private function escaper( nl, sep, qte ) {
+		return new Escaper( false, nl, sep, qte );
+	}
+
+	public function testEncodingPreservation() {
+		var e = escaper( "\n", ",", "\"" );
+		assertEquals( "i", e.escape( "i" ) );
+		assertEquals( String.fromCharCode(0xed), e.escape( String.fromCharCode(0xed) ) ); // í in latin-1
+	}
+
+}
+
+class TestEscaperUtf8 extends TestEscaperAsciiExt {
+
+	override private function escaper( nl, sep, qte ) {
+		return new Escaper( true, nl, sep, qte );
+	}
+
+	override public function testEncodingPreservation() {
+		var e = escaper( "\n", ",", "\"" );
+		assertEquals( "i", e.escape( "i" ) );
+		assertEquals( "í", e.escape( "í" ) );
+	}
+
 }

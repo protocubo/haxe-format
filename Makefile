@@ -1,4 +1,4 @@
-all: neko cpp cpp64 java
+all: neko java cpp cpp64
 
 neko:
 	################################################################################
@@ -32,6 +32,14 @@ java:
 	java -jar exp/unit_tests/java/java.jar
 .PHONY: java
 
+swf:
+	################################################################################
+	###   UNIT TESTS - Flash (swf)                                               ###
+	################################################################################
+	haxe ${HXFLAGS} unit_tests.swf.hxml
+flash: swf
+.PHONY: swf flash
+
 package:
 	rm -f elebeta-format.zip
 	zip -r elebeta-format.zip . -x exp/\* .git/\* .hxsublime_tmp/\* gitstats/\* \
@@ -41,4 +49,3 @@ package:
 install: package
 	haxelib local elebeta-format.zip
 .PHONY: install
-

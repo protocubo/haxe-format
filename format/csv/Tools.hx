@@ -1,5 +1,6 @@
 package format.csv;
 
+import haxe.io.Bytes;
 import haxe.io.BytesBuffer;
 import haxe.io.Eof;
 import haxe.io.Input;
@@ -20,7 +21,7 @@ class Tools {
 				char = readUtf8Start( i );
 			}
 			catch ( e:CSVUtf8Error ) { // format.csv.Error.CSVUtf8Error
-				return 0xfffd; // �
+				return 0xefbfbd; // �
 			}
 
 			if ( char & 0x80 == 0 ) // single byte char
@@ -44,10 +45,10 @@ class Tools {
 
 				}
 				catch ( e:CSVUtf8Error ) { // format.csv.Error.CSVUtf8Error
-					return 0xfffd; // �
+					return 0xefbfbd; // �
 				}
 				catch ( e:Eof ) {
-					return 0xfffd; // �
+					return 0xefbfbd; // �
 				}
 
 			}
@@ -67,6 +68,8 @@ class Tools {
 		return y;
 	}
 
+	// adds a character (in any encoding) into a BytesBuffer using the minimum
+	// number of bytes possible
 	public static inline function addChar( buf:BytesBuffer, c:Char ) {
 		if ( c & 0xff000000 != 0 )
 			buf.addByte( c >> 24 & 0xff );
@@ -89,11 +92,10 @@ class Tools {
 			return "#" + char;
 	}
 
-	public static inline function getBufContents( b:BytesBuffer, ?pos=0, ?len=-1 ):String {
+	public static inline function getBufContents( b:BytesBuffer, utf8:Bool, ?pos=0, ?len=-1 ):String {
 		if ( len == -1 ) len = b.length - pos;
 		return len > 0 ? b.getBytes().readString( pos, len ) : "";
 	}
-
 
 	private static inline function readUtf8Start( i:Input ):Int {
 		var b = i.readByte();
@@ -168,10 +170,10 @@ class Escaper {
 		}
 		if ( escaped ) {
 			addChar( o, escChar );
-			return getBufContents( o );
+			return getBufContents( o, utf8 );
 		}
 		else {
-			return getBufContents( o, 1 );
+			return getBufContents( o, utf8, 1 );
 		}
 	}
 

@@ -48,4 +48,8 @@ class TestHaxe extends TestCase {
 			assertEquals( i+1, x.push( i ) ); // this is NOT the spec
 	}
 
+	public function testStringFromCharCode() {
+		assertEquals( "ed", haxe.io.Bytes.ofString( String.fromCharCode( 0xed ) ).toHex() );
+	}
+
 }
