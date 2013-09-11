@@ -194,6 +194,7 @@ class TestETTReader extends TestCase {
 	}
 
 	function getSample( major:Int, minor:Int ):BytesInput {
+		// trace( haxe.Resource.listNames() );
 		var data = haxe.Resource.getBytes( 'res.ett.sample${major}_${minor}' );
 		// trace( data.toString().substr( 0, 40 ) );
 		// trace( new BytesInput( data ).readAll().toString() );
@@ -201,6 +202,7 @@ class TestETTReader extends TestCase {
 	}
 
 	function getData( major:Int, minor:Int ):Array<Dynamic> {
+		// trace( haxe.Resource.listNames() );
 		var data = haxe.Resource.getString( 'res.ett.data${major}_${minor}' );
 		// trace( data.substr( 0, 40 ) );
 		// trace( haxe.Unserializer.run( data ) );
