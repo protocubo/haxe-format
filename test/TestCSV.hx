@@ -100,11 +100,6 @@ class TestCSVReader extends TestCase {
 		            , read( "'1',,'3'N,'2',N", "N", ",", "'" ) );
 	}
 
-	// public function testErrors() {
-	// 	// the reader should also be set in some sort of invalid state
-	// 	assertTrue( true );
-	// }
-
 	public function testEofBug() {
 		assertAnyException( reader( new StringInput( "" ), "\n", " ", "'" ).readRecord.bind(null) );
 	}
@@ -129,18 +124,22 @@ class TestCSVReader extends TestCase {
 		return write( y );
 	}
 
+	private function bi( bs:Array<Int> ):BytesInput {
+		var bb = new BytesBuffer();
+		for ( b in bs )
+			bb.addByte( b );
+		return new BytesInput( bb.getBytes() );
+	}
+
+
 }
 
 class TestCSVReaderAsciiExt extends TestCSVReader {
 
-	private function ch( char:Int ):String {
-		return String.fromCharCode( char );
-	}
-
-	public function testAsciiExt() {
-		assertEquals( write( [ [11,ch(0xed),13], [21,22,23] ] )
-			         , read( "11:"+ch(0xed)+":13$21:22:23$", "$", ":", "'" ) );
-	}
+	// public function testAsciiExt() {
+	// 	assertEquals( write( [ [11,ch(0xED),13], [21,22,23] ] )
+	// 		         , read( "11:"+ch(0xED)+":13$21:22:23$", "$", ":", "'" ) );
+	// }
 
 }
 
@@ -148,10 +147,6 @@ class TestCSVReaderUtf8 extends TestCSVReader {
 
 	override function reader( i, nl, sep, qte ) {
 		return new Reader( i, nl, sep, qte, true );
-	}
-
-	private function ch( char:Int ):String {
-		return String.fromCharCode( char );
 	}
 
 	public function testUtf8Crit() {
@@ -181,8 +176,7 @@ class TestCSVReaderUtf8 extends TestCSVReader {
 	}
 
 	public function testReplacement() {
-		assertEquals( 0xefbfbd, Tools.readChar( new StringInput( ch(0xed) ), true ) );
-		assertEquals( write( [ ["�"] ] ), read( ch(0xed), "N", "|", "'" ) );
+		assertEquals( 0xEFBFBD, Tools.readChar( bi([0xED]), true ) );
 	}
 
 }
@@ -226,14 +220,13 @@ class MeasureCSVReader extends TestCase {
 
 class TestTools extends TestCase {
 
-	public static inline function getBufContents( b:BytesBuffer, ?pos=0, ?len=-1 ):String {
-		if ( len == -1 ) len = b.length - pos;
-		return len > 0 ? b.getBytes().readString( pos, len ) : "";
-	}
-
 	public function testGetBufContents() {
 		var bb = function ( bs:Array<Int> ) { var bb = new BytesBuffer(); for ( b in bs ) bb.addByte( b ); return bb; };
-		assertEquals( "ed", Bytes.ofString( getBufContents(bb([0xed])) ).toHex() );
+		#if ( neko || cpp )
+		assertEquals( "ed", Bytes.ofString( Tools.getBufContents(bb([0xED]),false) ).toHex() );
+		#else
+		assertEquals( "c3ad", Bytes.ofString( Tools.getBufContents(bb([0xED]),false) ).toHex() );
+		#end
 	}
 
 }
@@ -247,7 +240,7 @@ class TestEscaperAsciiExt extends TestCase {
 	public function testEncodingPreservation() {
 		var e = escaper( "\n", ",", "\"" );
 		assertEquals( "i", e.escape( "i" ) );
-		assertEquals( String.fromCharCode(0xed), e.escape( String.fromCharCode(0xed) ) ); // í in latin-1
+		assertEquals( String.fromCharCode(0xED), e.escape( String.fromCharCode(0xED) ) ); // í in latin-1
 	}
 
 }

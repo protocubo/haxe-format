@@ -3,17 +3,13 @@ package ;
 class TestHaxe extends TestCase {
 	
 	public function testEmptyBytes() {
-		var b = haxe.io.Bytes.alloc( 0 );
-		assertEquals( "", b.toString() ); // fails for C++
 		// https://github.com/HaxeFoundation/haxe/issues/2076
+		var b = haxe.io.Bytes.alloc( 0 );
+		assertEquals( "", b.toString() );
+		assertEquals( "", b.readString( 0, 0 ) );
 		var bb = new haxe.io.BytesBuffer();
 		assertEquals( "", bb.getBytes().toString() );
-	}
-
-	public function testEmptyBytes2() {
-		var b = haxe.io.Bytes.alloc( 0 );
-		assertEquals( "", b.readString( 0, 0 ) ); // fails for C++
-		var bb = new haxe.io.BytesBuffer();
+		bb = new haxe.io.BytesBuffer();
 		assertEquals( "", bb.getBytes().readString( 0, 0 ) );
 	}
 
@@ -49,7 +45,11 @@ class TestHaxe extends TestCase {
 	}
 
 	public function testStringFromCharCode() {
+		#if ( neko || cpp )
 		assertEquals( "ed", haxe.io.Bytes.ofString( String.fromCharCode( 0xed ) ).toHex() );
+		#else
+		assertEquals( "c3ad", haxe.io.Bytes.ofString( String.fromCharCode( 0xed ) ).toHex() );
+		#end
 	}
 
 }
