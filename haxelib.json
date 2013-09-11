@@ -4,8 +4,8 @@
   "license": "BSD",
   "tags": [],
   "description": "Additional file formats support for Haxe.",
-  "version": "1.0.0",
-  "releasenote": "see CHANGES.md",
+  "version": "1.0.1-alpha",
+  "releasenote": "[pre-release] fixes CSV i/o for Java with non UTF-8 streams",
   "contributors": [ "elebeta", "jonasmalacofilho" ],
   "dependencies": {
 
