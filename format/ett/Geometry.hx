@@ -49,5 +49,6 @@ class LineString {
 		return b.toString();
 	}
 	public inline function push( p:Point ):Int return point.push( p );
+	public inline function array():Array<Point> return point.copy();
 	private function get_length() return point.length;
 }
