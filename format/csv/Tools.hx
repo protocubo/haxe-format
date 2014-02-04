@@ -145,19 +145,19 @@ class Tools {
 	// other tools ------------------------------------------------------------------------------------------------------
 
 	public static inline function getBufContents( b:BytesBuffer, utf8:Bool, ?pos=0, ?len=-1 ):String {
-		if ( len == -1 ) len = b.length - pos;
+		var bytes = b.getBytes();
+		if ( len == -1 ) len = bytes.length - pos;
 		#if ( neko || cpp )
-		return len > 0 ? b.getBytes().readString( pos, len ) : "";
+		return len > 0 ? bytes.readString( pos, len ) : "";
 		#else
 		if ( len == 0 ) {
 			return "";
 		}
 		else if ( utf8 ) {
-			return len > 0 ? b.getBytes().readString( pos, len ) : "";
+			return len > 0 ? bytes.readString( pos, len ) : "";
 		}
 		else {
 			var sbuf = new StringBuf();
-			var bytes = b.getBytes();
 			for ( i in pos...(pos+len) ) {
 				sbuf.addChar( bytes.get( i ) );
 			}
