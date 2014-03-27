@@ -165,8 +165,9 @@ class ETTReader {
 				i++;
 			}
 			if ( i == kb.length ) {
-				var bufLen = buf.length;
-				return buf.getBytes().sub( 0, bufLen - kb.length );
+				var bytes = buf.getBytes();
+				var bufLen = bytes.length;
+				return bytes.sub( 0, bufLen - kb.length );
 			}
 		}
 		return null;
