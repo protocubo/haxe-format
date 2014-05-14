@@ -32,7 +32,7 @@ java:
 	###   UNIT TESTS - Java (local)                                              ###
 	################################################################################
 	haxe ${HXFLAGS} unit_tests.java.hxml
-	java -jar exp/unit_tests/java/java.jar
+	java -jar exp/unit_tests/java/Main.jar
 .PHONY: java
 
 swf:
