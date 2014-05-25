@@ -1,3 +1,4 @@
+
 all: neko java cpp cpp64 swf
 
 neko:
@@ -43,6 +44,15 @@ swf:
 	haxe ${HXFLAGS} unit_tests.swf.hxml
 flash: swf
 .PHONY: swf flash
+
+python:
+	################################################################################
+	###   UNIT TESTS - Python (local)                                            ###
+	################################################################################
+	mkdir -p exp/unit_tests/python
+	haxe ${HXFLAGS} unit_tests.python.hxml
+	python3 exp/unit_tests/python/unit_tests.py
+.PHONY: python
 
 package:
 	rm -f elebeta-format.zip

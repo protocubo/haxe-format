@@ -1,0 +1,6 @@
+-python exp/unit_tests/python/unit_tests.py
+-main Main
+-cp test
+#-D dump
+-D TESTCSV
+res/ett/add.hxml
