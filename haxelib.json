@@ -4,8 +4,8 @@
   "license": "BSD",
   "tags": [],
   "description": "Additional file formats support for Haxe.",
-  "version": "1.0.2",
-  "releasenote": "Fixed 'BytesBuffer has no length' for haxe 3.0.1",
+  "version": "1.0.3",
+  "releasenote": "Removed deprecation warnings for Bytes.readString",
   "contributors": [ "elebeta", "jonasmalacofilho" ],
   "dependencies": { }
 }
