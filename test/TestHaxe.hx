@@ -6,11 +6,11 @@ class TestHaxe extends TestCase {
 		// https://github.com/HaxeFoundation/haxe/issues/2076
 		var b = haxe.io.Bytes.alloc( 0 );
 		assertEquals( "", b.toString() );
-		assertEquals( "", b.readString( 0, 0 ) );
+		assertEquals( "", b.getString( 0, 0 ) );
 		var bb = new haxe.io.BytesBuffer();
 		assertEquals( "", bb.getBytes().toString() );
 		bb = new haxe.io.BytesBuffer();
-		assertEquals( "", bb.getBytes().readString( 0, 0 ) );
+		assertEquals( "", bb.getBytes().getString( 0, 0 ) );
 	}
 
 	public function testCharSequence() {

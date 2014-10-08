@@ -148,13 +148,13 @@ class Tools {
 		var bytes = b.getBytes();
 		if ( len == -1 ) len = bytes.length - pos;
 		#if ( neko || cpp )
-		return len > 0 ? bytes.readString( pos, len ) : "";
+		return len > 0 ? bytes.getString( pos, len ) : "";
 		#else
 		if ( len == 0 ) {
 			return "";
 		}
 		else if ( utf8 ) {
-			return len > 0 ? bytes.readString( pos, len ) : "";
+			return len > 0 ? bytes.getString( pos, len ) : "";
 		}
 		else {
 			var sbuf = new StringBuf();
