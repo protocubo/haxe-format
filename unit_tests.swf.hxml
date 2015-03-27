@@ -1,7 +1,0 @@
--swf exp/unit_tests/swf/unit_tests.swf
--main Main
--cp test
-#-D dump
--D TESTCSV
-res/ett/add.hxml
---no-inline

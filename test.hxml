@@ -1,6 +1,7 @@
--java exp/unit_tests/java/
+--interp
 -main Main
 -cp test
 #-D dump
 -D TESTCSV
 res/ett/add.hxml
+

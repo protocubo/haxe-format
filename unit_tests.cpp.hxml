@@ -1,9 +1,0 @@
--cpp exp/unit_tests/cpp/local/
--main Main
--cp test
-#-D dump
--D TESTCSV
--D HXCPP_STACK_TRACE
--D HXCPP_STACK_LINE
--D HXCPP_M32
-res/ett/add.hxml

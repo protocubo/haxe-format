@@ -252,6 +252,8 @@ class ETTReader {
 		case TInt:
 
 			s = trim( s );
+                        if (s.charAt(0) == "+")
+                            s = s.substr(1);  // --interp can't handle preceding +
 			if ( s.length != 0 ) {
 				#if ETT_UNSAFE
 				encaps( Std.parseInt, s );

@@ -119,6 +119,7 @@ class TestETTReader extends TestCase {
 		assertEquals( 42, r.parseData( "0x2a", TInt ) );
 		assertEquals( 42, r.parseData( "0x2A", TInt ) );
 		assertEquals( 42, r.parseData( "0X2A", TInt ) );
+		assertEquals( 42, r.parseData( "+0x2a", TInt ) );
 
 		// expected failures
 		// this type checking is disabled with ETT_UNSAFE
@@ -129,7 +130,6 @@ class TestETTReader extends TestCase {
 		assertAnyException( r.parseData.bind( "42 a", TInt ) );
 		assertAnyException( r.parseData.bind( "- 42", TInt ) );
 		assertAnyException( r.parseData.bind( "-+42", TInt ) );
-		assertAnyException( r.parseData.bind( "+0xff", TInt ) );
 		assertAnyException( r.parseData.bind( "+xff", TInt ) );
 	}
 
@@ -228,8 +228,8 @@ class TestETTWriter extends TestCase {
 	public function testWriteData() {
 		var w = std.Type.createEmptyInstance( Writer );
 		var d = { b:false, i:1, f:1.1, fi:1, s:"s"
-		        , d:Date.fromString( "2013-08-15" )
-		        , t:Date.fromString( "2013-08-15" ).getTime()
+		        , d:Date.fromString( "2013-08-15 00:00:00" )
+		        , t:Date.fromString( "2013-08-15 00:00:00" ).getTime()
 		        , hs:[1,null,0] };
 		assertEquals( "false", w.writeData( d, "b", TBool ) );
 		assertEquals( "1", w.writeData( d, "i", TInt ) );
