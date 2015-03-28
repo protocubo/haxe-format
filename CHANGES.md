@@ -7,6 +7,7 @@ HEAD
  - Ensure coexistence between the old Reader (copied to format.csv.old and
    replaced by a shim) the lib 'csv'
  - Test on --interp
+ - [TODO] Travis
 
 Version 1.0.1
 --------------------------------------------------------------------------------
