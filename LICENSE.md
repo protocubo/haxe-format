@@ -5,7 +5,7 @@ elebeta-format
 --------------------------------------------------------------------------------
 _Additional file formats support for Haxe_
 
-Copyright (c) 2013, Arthur Campora Szász and Jonas Malaco Filho,
+Copyright (c) 2013-2014, Arthur Campora Szász and Jonas Malaco Filho,
 Elebeta Consultoria.
 All rights reserved.
 
