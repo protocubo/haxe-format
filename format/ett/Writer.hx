@@ -2,7 +2,7 @@ package format.ett;
 
 import format.ett.Data;
 import format.ett.Geometry;
-import format.csv.Tools;
+import elebeta.format.oldcsv.Tools;
 
 typedef Writer = ETTWriter;
 

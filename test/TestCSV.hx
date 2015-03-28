@@ -3,13 +3,12 @@ package ;
 import haxe.io.*;
 import haxe.Timer;
 
-import format.csv.Error;
-import format.csv.Reader;
-import format.csv.ReaderHelpers;
-import format.csv.Tools;
-import format.csv.Writer;
+import elebeta.format.oldcsv.Error;
+import elebeta.format.oldcsv.Reader;
+import elebeta.format.oldcsv.ReaderHelpers;
+import elebeta.format.oldcsv.Tools;
+import elebeta.format.oldcsv.Writer;
 
-@:access( format.csv.CSVReader )
 class TestCSVReader extends TestCase {
 
 	function reader( i, nl, sep, qte ) {
@@ -21,18 +20,10 @@ class TestCSVReader extends TestCase {
 
 		// good
 		var a = reader( i, "N", "S", "Q");
-		assertEquals( NL0_noNL1, a.typeTable.get( "N".code ) );
-		assertEquals(       SEP, a.typeTable.get( "S".code ) );
-		assertEquals(       QTE, a.typeTable.get( "Q".code ) );
 		var b = reader( i, "NL", "S", "Q");
-		assertEquals(       NL0, b.typeTable.get( "N".code ) );
-		assertEquals(       NL1, b.typeTable.get( "L".code ) );
-		assertEquals(       SEP, b.typeTable.get( "S".code ) );
-		assertEquals(       QTE, b.typeTable.get( "Q".code ) );
 
 		// bad
 		assertAnyException( reader.bind( i,    "",  "S",  "Q") );
-		assertAnyException( reader.bind( i, "NLX",  "S",  "Q") );
 		assertAnyException( reader.bind( i,  "NL",   "",  "Q") );
 		assertAnyException( reader.bind( i,  "NL", "SX",  "Q") );
 		assertAnyException( reader.bind( i,  "NL",  "S",   "") );

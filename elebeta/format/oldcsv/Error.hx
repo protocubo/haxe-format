@@ -1,4 +1,4 @@
-package format.csv;
+package elebeta.format.oldcsv;
 
 typedef Error = String;
 

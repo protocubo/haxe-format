@@ -1,8 +1,8 @@
-package format.csv;
+package elebeta.format.oldcsv;
 
 import haxe.io.Output;
 
-import format.csv.Tools;
+import elebeta.format.oldcsv.Tools;
 
 typedef Writer = CSVWriter;
 

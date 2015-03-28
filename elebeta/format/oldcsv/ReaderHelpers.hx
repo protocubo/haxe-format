@@ -1,6 +1,6 @@
-package format.csv;
+package elebeta.format.oldcsv;
 
-import format.csv.Tools;
+import elebeta.format.oldcsv.Tools;
 
 class CharTypeTable {
 	

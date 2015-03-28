@@ -1,4 +1,4 @@
-package format.csv;
+package elebeta.format.oldcsv;
 
 import haxe.io.Bytes;
 import haxe.io.BytesBuffer;
@@ -6,8 +6,8 @@ import haxe.io.Eof;
 import haxe.io.Input;
 import haxe.io.StringInput;
 
-import format.csv.Error;
-import format.csv.Tools.*;
+import elebeta.format.oldcsv.Error;
+import elebeta.format.oldcsv.Tools.*;
 
 typedef Byte = Int; // byte storage
 typedef Char = Int; // actual bytes of a char in a single integer (up to 4 bytes)
