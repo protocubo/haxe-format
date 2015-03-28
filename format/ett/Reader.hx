@@ -5,7 +5,7 @@ import haxe.Unserializer;
 import StringTools.trim;
 import Type.createEmptyInstance;
 
-import format.csv.Reader in CSVReader;
+import format.csv.old.Reader in CSVReader;
 
 import format.ett.Data;
 import format.ett.Error;

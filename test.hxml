@@ -5,3 +5,13 @@
 -D TESTCSV
 res/ett/add.hxml
 
+--next
+
+--interp
+-main Main
+-cp test
+-lib csv
+#-D dump
+-D TESTCSV
+res/ett/add.hxml
+

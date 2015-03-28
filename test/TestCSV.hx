@@ -4,12 +4,16 @@ import haxe.io.*;
 import haxe.Timer;
 
 import format.csv.Error;
+#if csv
+import format.csv.old.Reader;
+#else
 import format.csv.Reader;
+#end
 import format.csv.ReaderHelpers;
 import format.csv.Tools;
 import format.csv.Writer;
 
-@:access( format.csv.CSVReader )
+@:access(format.csv.old.CSVReader)
 class TestCSVReader extends TestCase {
 
 	function reader( i, nl, sep, qte ) {
